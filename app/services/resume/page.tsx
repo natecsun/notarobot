@@ -9,6 +9,7 @@ export default function ResumePage() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [result, setResult] = useState<{ analysis: string; rewritten_text: string } | null>(null);
+  const [tier, setTier] = useState<'free' | 'paid'>('free');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -24,6 +25,7 @@ export default function ResumePage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("tier", tier);
 
       const response = await fetch("/api/resume", {
         method: "POST",
@@ -34,7 +36,7 @@ export default function ResumePage() {
       if (response.ok) {
         setResult(data);
       } else {
-        alert("Error analyzing resume: " + data.error);
+        alert("Error: " + data.error);
       }
     } catch (error) {
       alert("Something went wrong. Please try again.");
@@ -46,11 +48,27 @@ export default function ResumePage() {
   return (
     <main className="min-h-screen p-4 md:p-24 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
       <div className="max-w-4xl mx-auto">
-        <Link href="/" className="inline-block mb-8">
-            <Button variant="ghost" className="gap-2 pl-0">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Button>
-        </Link>
+        <div className="flex justify-between items-center mb-8">
+            <Link href="/">
+                <Button variant="ghost" className="gap-2 pl-0">
+                <ArrowLeft className="w-4 h-4" /> Back to Home
+                </Button>
+            </Link>
+            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+                <button 
+                    onClick={() => setTier('free')}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${tier === 'free' ? 'bg-white dark:bg-black shadow text-black dark:text-white font-bold' : 'text-gray-500'}`}
+                >
+                    Free
+                </button>
+                <button 
+                    onClick={() => setTier('paid')}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${tier === 'paid' ? 'bg-accent text-black font-bold shadow' : 'text-gray-500'}`}
+                >
+                    Pro
+                </button>
+            </div>
+        </div>
 
         <h1 className="text-4xl font-bold mb-4">Resume Sanitizer</h1>
         <p className="text-gray-500 mb-12">

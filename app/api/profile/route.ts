@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { sendTelegramAlert } from "@/lib/telegram";
 
-const groq = new Groq({
+const groqFree = new Groq({
   apiKey: process.env.GROQ_API_KEY,
+});
+
+const groqPaid = new Groq({
+  apiKey: process.env.GROQ_API_KEY_PAID || process.env.GROQ_API_KEY,
 });
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
+    const tier = formData.get("tier") as string;
+
+    const client = tier === "paid" ? groqPaid : groqFree;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -30,7 +38,7 @@ export async function POST(req: Request) {
 
     // Send to Groq Vision Model
     try {
-      const chatCompletion = await groq.chat.completions.create({
+      const chatCompletion = await client.chat.completions.create({
         messages: [
           {
             role: "user",
@@ -75,11 +83,19 @@ export async function POST(req: Request) {
       
     } catch (groqError: any) {
       if (groqError.status === 429) {
-        sendTelegramAlert("RATE LIMIT HIT: Profile Spotter API (429)");
-        return NextResponse.json(
-          { error: "Traffic is high! We hit the free tier limit. Please try again in a minute." },
-          { status: 429 }
-        );
+        if (tier !== 'paid') {
+             sendTelegramAlert("RATE LIMIT HIT: Profile API (429) - Free Tier");
+             return NextResponse.json(
+               { error: "Free tier limit reached. Try again later or upgrade." },
+               { status: 429 }
+             );
+        } else {
+             sendTelegramAlert("CRITICAL: Paid Tier Profile API Rate Limit!");
+             return NextResponse.json(
+               { error: "Service busy. Please retry." },
+               { status: 429 }
+             );
+        }
       }
       throw groqError;
     }
