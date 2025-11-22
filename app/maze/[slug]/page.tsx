@@ -1,6 +1,7 @@
 import { MAZE_DATA } from "@/lib/maze-data";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MazeChat } from "@/components/MazeChat";
 
 export default function MazePage({ params }: { params: { slug: string } }) {
   const room = MAZE_DATA[params.slug];
@@ -16,22 +17,28 @@ export default function MazePage({ params }: { params: { slug: string } }) {
           {room.title}
         </h1>
 
-        <div 
-          className="text-xl md:text-2xl font-serif leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: room.content }}
-        />
+        {params.slug === 'chat-room' ? (
+            <MazeChat />
+        ) : (
+            <>
+                <div 
+                  className="text-xl md:text-2xl font-serif leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: room.content }}
+                />
 
-        <div className="mt-24 flex flex-wrap gap-8 items-center justify-center">
-          {room.links.map((link, i) => (
-            <Link 
-              key={i} 
-              href={link.href}
-              className={link.style}
-            >
-              {link.text}
-            </Link>
-          ))}
-        </div>
+                <div className="mt-24 flex flex-wrap gap-8 items-center justify-center">
+                  {room.links.map((link, i) => (
+                    <Link 
+                      key={i} 
+                      href={link.href}
+                      className={link.style}
+                    >
+                      {link.text}
+                    </Link>
+                  ))}
+                </div>
+            </>
+        )}
       </div>
     </main>
   );

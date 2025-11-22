@@ -134,7 +134,7 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     bgColor: "bg-purple-800",
     textColor: "text-green-400 font-mono",
     links: [
-      { text: "say hello", href: "/maze/glitch-city", style: "border border-green-400 px-2" },
+      { text: "say hello", href: "/maze/chat-room", style: "border border-green-400 px-2" },
       { text: "log off", href: "/maze/dial-up", style: "text-red-400 ml-4" }
     ]
   },
@@ -434,5 +434,13 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "leave", href: "/maze/start", style: "text-gray-300 text-xs" }
     ]
+  },
+  "chat-room": {
+    slug: "chat-room",
+    title: "Private Message",
+    content: "You are connected with [Unknown]. <br/> Say hello.",
+    bgColor: "bg-black",
+    textColor: "text-green-500",
+    links: [] // Handled by component
   }
 };
