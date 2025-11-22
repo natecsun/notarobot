@@ -14,6 +14,19 @@ export default async function ProfilePage() {
     return redirect("/login")
   }
 
+  // Fetch profile data
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  const isPro = profile?.is_pro || false
+  const usage = profile?.api_usage_count || 0
+  // Usage limit: 5 for free, 100 for pro
+  const limit = isPro ? 100 : 5
+  const usagePercent = Math.min((usage / limit) * 100, 100)
+
   return (
     <div className="min-h-screen bg-black text-white">
        <nav className="border-b border-white/10 bg-black/50 backdrop-blur-xl">
@@ -45,8 +58,8 @@ export default async function ProfilePage() {
                      <p className="font-mono">{user.email}</p>
                   </div>
                   <div>
-                     <label className="block text-xs font-mono text-gray-500 uppercase">User ID</label>
-                     <p className="font-mono text-xs text-gray-400">{user.id}</p>
+                     <label className="block text-xs font-mono text-gray-500 uppercase">Username</label>
+                     <p className="font-mono text-white">{profile?.username || "Anonymous"}</p>
                   </div>
                   <div>
                      <label className="block text-xs font-mono text-gray-500 uppercase">Status</label>
@@ -65,20 +78,24 @@ export default async function ProfilePage() {
                <div className="bg-black/50 rounded p-4 mb-6 border border-zinc-800">
                   <div className="flex justify-between items-center mb-2">
                      <span className="text-sm text-gray-400">Current Plan</span>
-                     <span className="font-bold">Free Tier</span>
+                     <span className={`font-bold ${isPro ? 'text-accent' : 'text-white'}`}>
+                        {isPro ? 'PRO TIER' : 'Free Tier'}
+                     </span>
                   </div>
                   <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                     <div className="bg-accent h-full w-[75%]"></div>
+                     <div className="bg-accent h-full transition-all duration-500" style={{ width: `${usagePercent}%` }}></div>
                   </div>
                   <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
                      <span>Daily API Usage</span>
-                     <span>75%</span>
+                     <span>{usage} / {limit}</span>
                   </div>
                </div>
                
-               <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">
-                  Upgrade to Pro
-               </Button>
+               {!isPro && (
+                 <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">
+                    Upgrade to Pro
+                 </Button>
+               )}
             </div>
          </div>
       </main>
