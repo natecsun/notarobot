@@ -21,14 +21,14 @@ const MOCK_DATA: GameItem[] = [
     type: 'text',
     content: "The intricate dance of shadows on the cobblestone street whispered secrets of a bygone era, where gas lamps flickered like dying stars against the encroaching velvet of night.",
     isAi: true,
-    source: "GPT-4o"
+    source: "GPT-4o (Creative Writing)"
   },
   {
     id: '2',
     type: 'text',
     content: "Call me Ishmael. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.",
     isAi: false,
-    source: "Moby Dick"
+    source: "Moby Dick by Herman Melville"
   },
   {
     id: '3',
@@ -36,6 +36,90 @@ const MOCK_DATA: GameItem[] = [
     content: "In the heart of the digital expanse, neurons of light fired in synchronized harmony, constructing a reality that was indistinguishable from the organic chaos of the physical realm.",
     isAi: true,
     source: "Claude 3 Opus"
+  },
+  {
+    id: '4',
+    type: 'text',
+    content: "yo u coming 2nite? sarah brought the dip lol",
+    isAi: false,
+    source: "Average Text Message"
+  },
+  {
+    id: '5',
+    type: 'text',
+    content: "Here's a Python function to calculate the Fibonacci sequence:\n\ndef fibonacci(n):\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    sequence = [0, 1]\n    while len(sequence) < n:\n        sequence.append(sequence[-1] + sequence[-2])\n    return sequence",
+    isAi: true,
+    source: "GitHub Copilot"
+  },
+  {
+    id: '6',
+    type: 'text',
+    content: "I saw the best minds of my generation destroyed by madness, starving hysterical naked, dragging themselves through the negro streets at dawn looking for an angry fix.",
+    isAi: false,
+    source: "Howl by Allen Ginsberg"
+  },
+  {
+    id: '7',
+    type: 'text',
+    content: "Certainly! I can help you with that. To bake a chocolate cake, you will need flour, sugar, cocoa powder, baking powder, and eggs. First, preheat your oven to 350°F (175°C).",
+    isAi: true,
+    source: "ChatGPT (Standard Response)"
+  },
+  {
+    id: '8',
+    type: 'text',
+    content: "Just pushed the fix to prod. Fingers crossed it doesn't break the payment gateway again. Coffee time.",
+    isAi: false,
+    source: "Slack Message (Human Dev)"
+  },
+  {
+    id: '9',
+    type: 'text',
+    content: "The tapestry of human experience is woven with threads of joy and sorrow, each creating a unique pattern that defines our existence in this vast, indifferent universe.",
+    isAi: true,
+    source: "Llama 3 (Philosophical Mode)"
+  },
+  {
+    id: '10',
+    type: 'text',
+    content: "For sale: baby shoes, never worn.",
+    isAi: false,
+    source: "Ernest Hemingway (Attributed)"
+  },
+  {
+    id: '11',
+    type: 'text',
+    content: "As an AI language model, I cannot predict the future or offer financial advice. However, historical trends suggest that market volatility is common during election years.",
+    isAi: true,
+    source: "ChatGPT (Safety Rails)"
+  },
+  {
+    id: '12',
+    type: 'text',
+    content: "The sky was the color of television, tuned to a dead channel.",
+    isAi: false,
+    source: "Neuromancer by William Gibson"
+  },
+  {
+    id: '13',
+    type: 'text',
+    content: "User authentication is handled via a JWT token stored in an HTTP-only cookie to prevent XSS attacks. The middleware validates this token on every protected route.",
+    isAi: true,
+    source: "Technical Documentation (AI Generated)"
+  },
+  {
+    id: '14',
+    type: 'text',
+    content: "LOL that cat video is insane. did u see the part where he jumps?? 💀",
+    isAi: false,
+    source: "YouTube Comment"
+  },
+  {
+    id: '15',
+    type: 'text',
+    content: "It was a bright cold day in April, and the clocks were striking thirteen.",
+    isAi: false,
+    source: "1984 by George Orwell"
   }
 ];
 
