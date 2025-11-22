@@ -36,18 +36,6 @@ const nextConfig = {
         ]
       }
     ]
-  },
-  webpack: (config, { isServer, webpack }) => {
-    if (isServer) {
-      // Replace pdf-parse test directory with empty module to prevent build errors
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /pdf-parse[/\\]test/,
-          require.resolve('./lib/empty-module.js')
-        )
-      );
-    }
-    return config;
   }
 }
 
