@@ -17,6 +17,10 @@ export default function RandyPage() {
         </div>
         <p className="mb-8 font-mono">randy ^</p>
 
+        <div className="mb-4">
+           <img src="/vibe/randy-eyes.jpg" alt="randy eyes" width={60} height={53} />
+        </div>
+
         {/* Scenarios Table */}
         <div className="w-full border-2 border-gray-400 mb-8">
             <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
@@ -58,6 +62,10 @@ export default function RandyPage() {
             </div>
         </div>
 
+        <div className="mb-4">
+           <img src="/vibe/randy-eyes.jpg" alt="randy eyes" width={60} height={53} />
+        </div>
+
         {/* Scouts Honor Table */}
         <div className="w-full border-2 border-gray-400 mb-8">
             <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
@@ -70,6 +78,11 @@ export default function RandyPage() {
                 <br /><br />
                 you might be a robot
             </div>
+        </div>
+
+        {/* Wayne Icon */}
+        <div className="self-start mb-2">
+            <img src="/vibe/wayne.jpg" alt="wayne" width={60} height={60} />
         </div>
 
         {/* Eight Ball Table */}
@@ -86,6 +99,10 @@ export default function RandyPage() {
             </div>
         </div>
 
+        <div className="mb-4">
+           <img src="/vibe/randy-eyes.jpg" alt="randy eyes" width={60} height={53} />
+        </div>
+
         {/* 3 Laws Table */}
         <div className="w-full border-2 border-gray-400 mb-8">
             <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
@@ -98,6 +115,11 @@ export default function RandyPage() {
             </div>
         </div>
 
+        {/* Wayne Icon */}
+        <div className="self-start mb-2">
+            <img src="/vibe/wayne.jpg" alt="wayne" width={60} height={60} />
+        </div>
+
         {/* Health and Fitness Table */}
         <div className="w-full border-2 border-gray-400 mb-8">
             <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
@@ -108,6 +130,10 @@ export default function RandyPage() {
                 <br /><br />
                 unless your blood type is 10w-40
             </div>
+        </div>
+
+        <div className="mb-4">
+           <img src="/vibe/randy-eyes.jpg" alt="randy eyes" width={60} height={53} />
         </div>
 
         {/* Im Randy Table */}
@@ -130,6 +156,68 @@ export default function RandyPage() {
             </div>
             <div className="p-2 font-mono text-sm">
                 are coming
+            </div>
+        </div>
+
+        <div className="mb-4">
+           <img src="/vibe/randy-eyes.jpg" alt="randy eyes" width={60} height={53} />
+        </div>
+
+        {/* No Dentists Table */}
+        <div className="w-full border-2 border-gray-400 mb-8">
+            <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
+                no dentists
+            </div>
+            <div className="p-2 font-mono text-sm">
+                sabretooth tiger cats were known for having giant canine teeth. they roamed the prehistoric earth terrorizing their prey. but having the biggest tooth means getting the biggest tooth ache. and there were no dentists around. it is no wonder they are extinct.
+            </div>
+        </div>
+
+        {/* Wayne Icon */}
+        <div className="self-start mb-2">
+            <img src="/vibe/wayne.jpg" alt="wayne" width={60} height={60} />
+        </div>
+
+        {/* Easy Peasy Table */}
+        <div className="w-full border-2 border-gray-400 mb-8">
+            <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
+                easy peasy
+            </div>
+            <div className="p-2 font-mono text-sm">
+                i can always spot a robot out of a crowd because they do not have souls.
+                <br /><br />
+                also they are made entirely out of metal.
+            </div>
+        </div>
+
+        <div className="mb-4">
+           <img src="/vibe/randy-eyes.jpg" alt="randy eyes" width={60} height={53} />
+        </div>
+
+        {/* No Shut Down Button Table */}
+        <div className="w-full border-2 border-gray-400 mb-8">
+            <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
+                no shut down button
+            </div>
+            <div className="p-2 font-mono text-sm">
+                what people most misunderstand about robots is they think since we created them, we can control them.
+                <br /><br />
+                good luck with that.
+            </div>
+        </div>
+
+        {/* Wayne Icon */}
+        <div className="self-start mb-2">
+            <img src="/vibe/wayne.jpg" alt="wayne" width={60} height={60} />
+        </div>
+
+        {/* No Direction Table */}
+        <div className="w-full border-2 border-gray-400 mb-8">
+            <div className="bg-yellow-400 border-b-2 border-gray-400 p-1 font-bold">
+                no direction
+            </div>
+            <div className="p-2 font-mono text-sm">
+                lost little robot
             </div>
         </div>
 
