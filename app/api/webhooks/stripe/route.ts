@@ -22,22 +22,21 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const userId = session.metadata?.userId;
+    const amount = parseInt(session.metadata?.amount || '0');
 
-    if (userId) {
+    if (userId && amount > 0) {
       const supabase = createAdminClient();
 
-      // Upgrade user to Pro
-      const { error } = await supabase
-        .from("profiles")
-        .update({ is_pro: true })
-        .eq("id", userId);
+      // Add credits via RPC
+      const { error } = await supabase.rpc('add_credits', {
+        user_id: userId,
+        amount: amount
+      });
 
       if (error) {
-        console.error("Error updating profile:", error);
-        return NextResponse.json({ error: "Database update failed" }, { status: 500 });
+        console.error('Error adding credits:', error);
+        return NextResponse.json({ error: 'Error updating profile' }, { status: 500 });
       }
-
-      console.log(`User ${userId} upgraded to Pro!`);
     }
   }
 

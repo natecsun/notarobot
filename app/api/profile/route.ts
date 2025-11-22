@@ -1,22 +1,44 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
-
-const groqFree = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+import { createClient } from "@/utils/supabase/server";
 
 const groqPaid = new Groq({
   apiKey: process.env.GROQ_API_KEY_PAID || process.env.GROQ_API_KEY,
 });
 
+import { cookies } from "next/headers";
+
 export async function POST(req: Request) {
   try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const cookieStore = cookies();
+
+    // Visitor Logic (No User)
+    if (!user) {
+      const usageCount = parseInt(cookieStore.get("visitor_usage")?.value || "0");
+      if (usageCount >= 2) {
+        return NextResponse.json({ error: "Visitor limit reached. Please sign up for 50 free credits." }, { status: 403 });
+      }
+    } else {
+      // User Logic (Check Credits)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile || (profile.credits || 0) < 1) {
+        return NextResponse.json({ error: "Insufficient credits. Please buy more." }, { status: 403 });
+      }
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const tier = formData.get("tier") as string;
 
-    const client = tier === "paid" ? groqPaid : groqFree;
+    // Use paid client
+    const client = groqPaid;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -74,28 +96,30 @@ export async function POST(req: Request) {
       });
 
       const responseContent = chatCompletion.choices[0]?.message?.content;
-      
+
       if (!responseContent) {
         throw new Error("No response from AI");
       }
 
+      // Deduct credit OR increment visitor cookie
+      if (user && user.id) {
+        await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
+      } else {
+        const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
+        const response = NextResponse.json(JSON.parse(responseContent));
+        response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 });
+        return response;
+      }
+
       return NextResponse.json(JSON.parse(responseContent));
-      
+
     } catch (groqError: any) {
       if (groqError.status === 429) {
-        if (tier !== 'paid') {
-             sendTelegramAlert("RATE LIMIT HIT: Profile API (429) - Free Tier");
-             return NextResponse.json(
-               { error: "Free tier limit reached. Try again later or upgrade." },
-               { status: 429 }
-             );
-        } else {
-             sendTelegramAlert("CRITICAL: Paid Tier Profile API Rate Limit!");
-             return NextResponse.json(
-               { error: "Service busy. Please retry." },
-               { status: 429 }
-             );
-        }
+        sendTelegramAlert("CRITICAL: Profile API Rate Limit Hit!");
+        return NextResponse.json(
+          { error: "System is under heavy load. Please try again shortly." },
+          { status: 429 }
+        );
       }
       throw groqError;
     }

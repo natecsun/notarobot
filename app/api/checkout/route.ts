@@ -18,8 +18,8 @@ export async function POST(req: Request) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "NotARobot Pro",
-              description: "Unlimited AI Resume Sanitization & Profile Checks",
+              name: "1000 AI Credits",
+              description: "Pro Tier: 1000 Credits for Resume & Profile Analysis",
             },
             unit_amount: 1000, // $10.00 USD
           },
@@ -32,6 +32,8 @@ export async function POST(req: Request) {
       customer_email: user.email,
       metadata: {
         userId: user.id,
+        type: 'credits',
+        amount: 1000,
       },
     });
 

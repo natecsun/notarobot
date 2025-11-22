@@ -7,9 +7,15 @@ import { LogOut, User, CreditCard } from "lucide-react"
 import { UpgradeButton } from "@/components/upgrade-button"
 import { CheckoutButton } from "@/components/CheckoutButton"
 
+import { Confetti } from "@/components/ui/confetti"
+
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+   searchParams,
+}: {
+   searchParams: { success?: string; canceled?: string }
+}) {
    const supabase = createClient()
 
    const { data: { user } } = await supabase.auth.getUser()
@@ -25,14 +31,18 @@ export default async function ProfilePage() {
       .eq('id', user.id)
       .single()
 
-   const isPro = profile?.is_pro || false
+   // Optimistically show Pro UI if success param is present
+   const isPro = profile?.is_pro || searchParams?.success === "true"
    const usage = profile?.api_usage_count || 0
    // Usage limit: 5 for free, 100 for pro
    const limit = isPro ? 100 : 5
    const usagePercent = Math.min((usage / limit) * 100, 100)
+   const showSuccess = searchParams?.success === "true" && isPro
 
    return (
       <div className="min-h-screen bg-black text-white">
+         {showSuccess && <Confetti />}
+
          <nav className="border-b border-white/10 bg-black/50 backdrop-blur-xl">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                <Link href="/" className="font-mono font-bold text-xl tracking-tighter flex items-center gap-3">
@@ -48,6 +58,18 @@ export default async function ProfilePage() {
          </nav>
 
          <main className="max-w-4xl mx-auto p-6 py-12">
+            {showSuccess && (
+               <div className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+                  <div className="bg-green-500 rounded-full p-2">
+                     <CreditCard className="w-6 h-6 text-black" />
+                  </div>
+                  <div>
+                     <h3 className="font-bold text-green-400 text-lg">Welcome to Pro Mode!</h3>
+                     <p className="text-green-400/80 text-sm">Your account has been successfully upgraded. Enjoy unlimited access.</p>
+                  </div>
+               </div>
+            )}
+
             <h1 className="text-3xl font-bold mb-8">Human Profile</h1>
 
             <div className="grid md:grid-cols-2 gap-8">
@@ -81,23 +103,21 @@ export default async function ProfilePage() {
                   </h2>
                   <div className="bg-black/50 rounded p-4 mb-6 border border-zinc-800">
                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-400">Current Plan</span>
-                        <span className={`font-bold ${isPro ? 'text-accent' : 'text-white'}`}>
-                           {isPro ? 'PRO TIER' : 'Free Tier'}
+                        <span className="text-sm text-gray-400">Available Credits</span>
+                        <span className="font-bold text-accent text-lg">
+                           {profile?.credits || 0}
                         </span>
                      </div>
                      <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                        <div className="bg-accent h-full transition-all duration-500" style={{ width: `${usagePercent}%` }}></div>
+                        <div className="bg-accent h-full transition-all duration-500" style={{ width: `${Math.min(((profile?.credits || 0) / 1000) * 100, 100)}%` }}></div>
                      </div>
                      <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-                        <span>Daily API Usage</span>
-                        <span>{usage} / {limit}</span>
+                        <span>1 Credit = 1 Analysis</span>
+                        <span>Max: 1000</span>
                      </div>
                   </div>
 
-                  {!isPro && (
-                     <CheckoutButton />
-                  )}
+                  <CheckoutButton />
                </div>
             </div>
          </main>

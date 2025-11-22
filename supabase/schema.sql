@@ -5,6 +5,7 @@ create table profiles (
   username text unique,
   avatar_url text,
   is_pro boolean default false,
+  credits integer default 0,
   api_usage_count integer default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -25,8 +26,8 @@ create policy "Users can update own profile." on profiles
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, username)
-  values (new.id, new.email, split_part(new.email, '@', 1));
+  insert into public.profiles (id, email, username, credits)
+  values (new.id, new.email, split_part(new.email, '@', 1), 50);
   return new;
 end;
 $$ language plpgsql security definer;
@@ -52,3 +53,22 @@ create policy "Leaderboard is viewable by everyone" on leaderboard
 
 create policy "Users can insert their own scores" on leaderboard
   for insert with check (auth.uid() = user_id);
+
+-- 5. RPC Functions for Credits
+create or replace function add_credits(user_id uuid, amount int)
+returns void as $$
+begin
+  update public.profiles
+  set credits = credits + amount
+  where id = user_id;
+end;
+$$ language plpgsql security definer;
+
+create or replace function deduct_credits(user_id uuid, amount int)
+returns void as $$
+begin
+  update public.profiles
+  set credits = credits - amount
+  where id = user_id;
+end;
+$$ language plpgsql security definer;

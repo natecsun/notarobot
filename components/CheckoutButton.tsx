@@ -30,7 +30,7 @@ export function CheckoutButton() {
         <Button
             onClick={handleCheckout}
             disabled={loading}
-            className="w-full bg-white text-black hover:bg-gray-200 font-bold"
+            className="w-full bg-accent hover:bg-accent/90 text-black font-bold"
         >
             {loading ? (
                 <>
@@ -38,7 +38,7 @@ export function CheckoutButton() {
                     Processing...
                 </>
             ) : (
-                "Upgrade to Pro"
+                "Buy 1000 Credits ($10)"
             )}
         </Button>
     );
