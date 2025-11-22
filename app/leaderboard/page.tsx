@@ -1,18 +1,19 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, Trophy, Medal } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
 
-const LEADERBOARD_DATA = [
-  { rank: 1, name: "Sarah_Real", score: 9850, accuracy: "99.2%", streak: 45 },
-  { rank: 2, name: "NotABot_99", score: 9420, accuracy: "98.5%", streak: 32 },
-  { rank: 3, name: "Turing_Test_Passed", score: 8900, accuracy: "97.8%", streak: 28 },
-  { rank: 4, name: "Human_Being_1", score: 8500, accuracy: "95.0%", streak: 15 },
-  { rank: 5, name: "DaVinci_Code", score: 8200, accuracy: "94.5%", streak: 12 },
-  { rank: 6, name: "BladeRunner", score: 7800, accuracy: "91.2%", streak: 10 },
-  { rank: 7, name: "Neo", score: 7500, accuracy: "90.0%", streak: 8 },
-];
+export const dynamic = "force-dynamic";
 
-export default function LeaderboardPage() {
+export default async function LeaderboardPage() {
+  const supabase = createClient();
+  
+  const { data: leaderboardData } = await supabase
+    .from('leaderboard')
+    .select('*')
+    .order('score', { ascending: false })
+    .limit(50);
+
   return (
     <main className="min-h-screen px-4 pt-24 pb-12 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
       <div className="max-w-4xl mx-auto">
@@ -37,20 +38,26 @@ export default function LeaderboardPage() {
           </div>
           
           <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {LEADERBOARD_DATA.map((user) => (
-              <div key={user.rank} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                <div className="col-span-2 flex justify-center">
-                  {user.rank === 1 && <Medal className="text-yellow-500 w-6 h-6" />}
-                  {user.rank === 2 && <Medal className="text-gray-400 w-6 h-6" />}
-                  {user.rank === 3 && <Medal className="text-amber-700 w-6 h-6" />}
-                  {user.rank > 3 && <span className="font-mono font-bold text-gray-500">#{user.rank}</span>}
-                </div>
-                <div className="col-span-4 font-medium text-lg">{user.name}</div>
-                <div className="col-span-2 text-right font-mono">{user.score}</div>
-                <div className="col-span-2 text-right text-green-600 dark:text-green-400 font-mono">{user.accuracy}</div>
-                <div className="col-span-2 text-right text-amber-600 dark:text-amber-500 font-mono">{user.streak}x</div>
-              </div>
-            ))}
+            {leaderboardData?.length === 0 ? (
+               <div className="p-8 text-center text-gray-500">
+                  No scores yet. Be the first to verify your humanity!
+               </div>
+            ) : (
+               leaderboardData?.map((user, index) => (
+                 <div key={user.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                   <div className="col-span-2 flex justify-center">
+                     {index + 1 === 1 && <Medal className="text-yellow-500 w-6 h-6" />}
+                     {index + 1 === 2 && <Medal className="text-gray-400 w-6 h-6" />}
+                     {index + 1 === 3 && <Medal className="text-amber-700 w-6 h-6" />}
+                     {index + 1 > 3 && <span className="font-mono font-bold text-gray-500">#{index + 1}</span>}
+                   </div>
+                   <div className="col-span-4 font-medium text-lg">{user.username}</div>
+                   <div className="col-span-2 text-right font-mono">{user.score.toLocaleString()}</div>
+                   <div className="col-span-2 text-right text-green-600 dark:text-green-400 font-mono">{user.accuracy}%</div>
+                   <div className="col-span-2 text-right text-amber-600 dark:text-amber-500 font-mono">{user.streak}x</div>
+                 </div>
+               ))
+            )}
           </div>
         </div>
         

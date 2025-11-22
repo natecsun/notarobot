@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 type GameItem = {
   id: string;
@@ -41,8 +43,14 @@ export function RealOrAI() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [gameState, setGameState] = useState<'playing' | 'result' | 'finished'>('playing');
   const [lastGuessCorrect, setLastGuessCorrect] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const supabase = createClient();
+  const router = useRouter();
 
   const currentItem = MOCK_DATA[currentIndex];
 
@@ -52,7 +60,10 @@ export function RealOrAI() {
     
     if (isCorrect) {
       setScore(s => s + 100 + (streak * 10));
-      setStreak(s => s + 1);
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      setMaxStreak(ms => Math.max(ms, newStreak));
+      setCorrectCount(c => c + 1);
     } else {
       setStreak(0);
     }
@@ -66,6 +77,39 @@ export function RealOrAI() {
       setGameState('playing');
     } else {
       setGameState('finished');
+      saveScore();
+    }
+  };
+
+  const saveScore = async () => {
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return; // Don't save if not logged in
+
+      // Get profile for username
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+
+      const accuracy = (correctCount / MOCK_DATA.length) * 100;
+
+      await supabase.from('leaderboard').insert({
+        user_id: user.id,
+        username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
+        score,
+        accuracy,
+        streak: maxStreak
+      });
+      
+      router.refresh(); // Refresh to update leaderboard if user navigates there
+    } catch (error) {
+      console.error('Error saving score:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -73,6 +117,8 @@ export function RealOrAI() {
     setCurrentIndex(0);
     setScore(0);
     setStreak(0);
+    setMaxStreak(0);
+    setCorrectCount(0);
     setGameState('playing');
   };
 
@@ -80,7 +126,14 @@ export function RealOrAI() {
     return (
       <div className="text-center p-8 bg-zinc-900 rounded-xl border border-zinc-800">
         <h2 className="text-3xl font-bold mb-4">Game Over!</h2>
-        <p className="text-xl mb-6">Final Score: <span className="text-accent font-mono">{score}</span></p>
+        <p className="text-xl mb-2">Final Score: <span className="text-accent font-mono">{score}</span></p>
+        <p className="text-gray-400 mb-6">
+          Accuracy: {Math.round((correctCount / MOCK_DATA.length) * 100)}% | 
+          Best Streak: {maxStreak}
+        </p>
+        
+        {isSaving && <p className="text-sm text-gray-500 mb-4">Saving to leaderboard...</p>}
+        
         <Button onClick={resetGame} className="gap-2">
           <RefreshCw className="w-4 h-4" /> Play Again
         </Button>
