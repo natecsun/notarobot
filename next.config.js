@@ -42,8 +42,13 @@ const nextConfig = {
       // Ignore test files from pdf-parse to prevent build errors
       config.plugins.push(
         new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/test\//,
-          contextRegExp: /pdf-parse/
+          checkResource(resource, context) {
+            // Ignore all test files and test data from pdf-parse
+            if (context.includes('pdf-parse') && (resource.includes('test') || resource.includes('/test/'))) {
+              return true;
+            }
+            return false;
+          }
         })
       );
     }
