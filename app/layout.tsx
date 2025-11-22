@@ -6,6 +6,9 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,8 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "min-h-screen bg-background antialiased")}>
+      <body className={cn(inter.className, "min-h-screen bg-black antialiased text-white")}>
+        <Navbar />
         {children}
+        <Footer />
         <SpeedInsights />
         <Analytics />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || "G-5191EBXXM8"} />

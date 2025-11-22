@@ -14,7 +14,7 @@ const LEADERBOARD_DATA = [
 
 export default function LeaderboardPage() {
   return (
-    <main className="min-h-screen p-4 md:p-24 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
+    <main className="min-h-screen px-4 pt-24 pb-12 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <Link href="/">

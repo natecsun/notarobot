@@ -1,32 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { Shield, FileSearch, UserX, GraduationCap, Trophy, Play, CheckCircle2, ArrowRight, Zap, Lock } from "lucide-react";
+import { FileSearch, UserX, GraduationCap, Trophy, Play, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { RobotLogo } from "@/components/ui/robot-logo";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-white">
-      {/* Floating Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-           <div className="font-mono font-bold text-xl tracking-tighter flex items-center gap-3">
-              <RobotLogo className="w-8 h-8" />
-              NOTAROBOT.COM
-           </div>
-           <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">Sign In</Link>
-              <Link href="/game">
-                <Button size="sm" className="bg-white text-black hover:bg-gray-200 font-bold">
-                   Start Verifying
-                </Button>
-              </Link>
-           </div>
-        </div>
-      </nav>
-
+    <main>
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-accent/20 blur-[120px] rounded-full pointer-events-none" />
@@ -158,16 +139,6 @@ export default function Home() {
             </div>
          </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-zinc-900 py-12 px-6 text-center text-gray-600 text-sm">
-         <div className="flex items-center justify-center gap-6 mb-8">
-            <Shield className="w-6 h-6 text-zinc-700" />
-            <Lock className="w-6 h-6 text-zinc-700" />
-            <CheckCircle2 className="w-6 h-6 text-zinc-700" />
-         </div>
-         <p>&copy; 2024 NotARobot Inc. Built for the resistance.</p>
-      </footer>
     </main>
   );
 }
