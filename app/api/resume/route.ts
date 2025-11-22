@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     try {
       // Use Claude to extract and rewrite resume text from PDF
       const message = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-latest",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 4096,
         messages: [
           {
