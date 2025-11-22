@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
-import { pdf } from "pdf-to-img";
 import { cookies } from "next/headers";
 
 const groqPaid = new Groq({
@@ -49,28 +48,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File size exceeds 5MB limit." }, { status: 400 });
     }
 
-    // 1. Convert PDF to images and send directly to vision model
+    // Convert File to base64 for Groq vision model
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const base64Pdf = buffer.toString('base64');
 
     try {
-      // Convert first 3 pages to images (to limit token usage)
-      const document = await pdf(buffer, { scale: 2 });
-      const images: string[] = [];
-
-      let pageCount = 0;
-      for await (const page of document) {
-        if (pageCount >= 3) break; // Limit to first 3 pages
-        const base64Image = page.toString('base64');
-        images.push(base64Image);
-        pageCount++;
-      }
-
-      if (images.length === 0) {
-        return NextResponse.json({ error: "Could not process PDF pages." }, { status: 400 });
-      }
-
-      // 2. Send images to Groq vision model for text extraction and rewriting
+      // Send PDF to Groq vision model via data URL
       const chatCompletion = await client.chat.completions.create({
         messages: [
           {
@@ -78,7 +62,7 @@ export async function POST(req: Request) {
             content: [
               {
                 type: "text",
-                text: `You are an expert executive resume writer and career coach. Please analyze this resume and:
+                text: `You are an expert executive resume writer and career coach. Please analyze this resume PDF and:
 1. Extract all the text content from the resume
 2. Rewrite it to sound natural, confident, and human, removing obvious "AI-generated" patterns
 
@@ -92,12 +76,12 @@ Return a JSON object with exactly two fields:
 - "analysis": A 1-2 sentence critique of the original resume's "vibe" (e.g., "The original text relied heavily on passive voice and generic buzzwords like 'leverage'.")
 - "rewritten_text": The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate`
               },
-              ...images.map(img => ({
-                type: "image_url" as const,
+              {
+                type: "image_url",
                 image_url: {
-                  url: `data:image/png;base64,${img}`
+                  url: `data:application/pdf;base64,${base64Pdf}`
                 }
-              }))
+              }
             ]
           }
         ],
