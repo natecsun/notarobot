@@ -1,4 +1,5 @@
-import { Shield, Lock, CheckCircle2 } from "lucide-react";
+import { Shield, Lock, CheckCircle2, Bot } from "lucide-react";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -7,6 +8,9 @@ export function Footer() {
           <Shield className="w-6 h-6 text-zinc-700" />
           <Lock className="w-6 h-6 text-zinc-700" />
           <CheckCircle2 className="w-6 h-6 text-zinc-700" />
+          <Link href="/randy" className="opacity-0 hover:opacity-50 transition-opacity duration-1000">
+            <Bot className="w-6 h-6 text-yellow-500" />
+          </Link>
        </div>
        <p>&copy; 2024 NotARobot Inc. Built for the resistance.</p>
     </footer>
