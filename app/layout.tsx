@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { GoogleAnalytics } from '@next/third-parties/google';
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(inter.className, "min-h-screen bg-background antialiased")}>
         {children}
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ""} />
       </body>
     </html>
   );
