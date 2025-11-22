@@ -1,0 +1,27 @@
+# Block AI crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# Block SEO crawlers (optional, keep if you want SEO)
+# User-agent: AhrefsBot
+# Disallow: /
+
+# Allow everyone else
+User-agent: *
+Allow: /
+Sitemap: https://notarobot.com/sitemap.xml
