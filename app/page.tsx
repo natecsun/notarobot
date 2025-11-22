@@ -1,111 +1,172 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
-import { Shield, FileSearch, UserX, GraduationCap, Trophy, Play } from "lucide-react";
+import { Shield, FileSearch, UserX, GraduationCap, Trophy, Play, CheckCircle2, ArrowRight, Zap, Lock } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-24 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          <span className="text-accent font-bold mr-2">&lt;NOT&gt;</span>
-          A ROBOT
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <Button variant="ghost" className="gap-2">
-             Login
-          </Button>
+    <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-black">
+      {/* Floating Nav */}
+      <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+           <div className="font-mono font-bold text-xl tracking-tighter flex items-center gap-2">
+              <div className="w-3 h-3 bg-accent rounded-full animate-pulse" />
+              NOTAROBOT
+           </div>
+           <div className="flex items-center gap-4">
+              <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">Sign In</Link>
+              <Link href="/game">
+                <Button size="sm" className="bg-white text-black hover:bg-gray-200 font-bold">
+                   Start Verifying
+                </Button>
+              </Link>
+           </div>
         </div>
-      </div>
+      </nav>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-to-br before:from-accent/20 before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-to-t from-blue-200 via-blue-200 blur-2xl content-[''] z-[-1]">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-            Prove Humanity.
-          </h1>
-          <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-            The internet is flooding with AI. We provide the tools to verify reality, sanitize your content, and prove you aren't just another LLM wrapper.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/game">
-              <Button variant="accent" size="lg" className="gap-2 text-lg">
-                <Play className="w-5 h-5" /> Play Real vs AI
-              </Button>
-            </Link>
-            <Button variant="outline" size="lg">
-              View Leaderboard
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-accent/20 blur-[120px] rounded-full pointer-events-none" />
+         
+         <div className="max-w-5xl mx-auto text-center relative z-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-xs font-mono mb-8"
+            >
+               <Zap className="w-3 h-3" /> POWERED BY GROQ & LLAMA 3
+            </motion.div>
 
-      <div className="grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-3 lg:text-left gap-6 mt-16">
-        <FeatureCard 
-          title="Resume Sanitizer" 
-          description="Recruiters are tired of ChatGPT resumes. Humanize your CV to pass the 'robot smell' test."
-          icon={<FileSearch className="w-8 h-8 mb-4 text-accent" />}
-          href="/services/resume"
-        />
-        <FeatureCard 
-          title="Fake Profile Spotter" 
-          description="Dating apps are full of bots. Upload a profile screenshot to detect generated images and bio text."
-          icon={<UserX className="w-8 h-8 mb-4 text-accent" />}
-          href="/services/profile"
-        />
-        <FeatureCard 
-          title="Essay Integrity" 
-          description="For professors and students. Verify the authenticity of academic work with advanced stylometry."
-          icon={<GraduationCap className="w-8 h-8 mb-4 text-accent" />}
-          href="/services/essay"
-        />
-      </div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-5xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
+            >
+               The Human Defense <br /> Layer for the Web.
+            </motion.h1>
 
-      <div className="mt-20 w-full max-w-5xl">
-         <div className="border rounded-xl p-8 bg-zinc-900/50 backdrop-blur">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <Trophy className="text-yellow-500" /> Global Human Leaderboard
-              </h2>
-              <Link href="/leaderboard" className="text-accent hover:underline text-sm">View All</Link>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
+               Detect deepfakes, sanitize AI-written text, and verify your humanity. 
+               The definitive toolkit for surviving the Dead Internet.
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col md:flex-row gap-4 justify-center items-center"
+            >
+               <Link href="/game">
+                  <Button size="lg" className="h-12 px-8 text-base bg-accent text-black hover:bg-accent/90 font-bold w-full md:w-auto">
+                     <Play className="w-4 h-4 mr-2" /> Play Real vs AI
+                  </Button>
+               </Link>
+               <Link href="/services/resume">
+                  <Button variant="outline" size="lg" className="h-12 px-8 text-base border-zinc-800 hover:bg-zinc-900 text-gray-300 w-full md:w-auto">
+                     Sanitize Resume
+                  </Button>
+               </Link>
+            </motion.div>
+         </div>
+      </section>
+
+      {/* Bento Grid Features */}
+      <section className="py-24 px-6 bg-zinc-950">
+         <div className="max-w-6xl mx-auto">
+            <div className="mb-12 flex items-center justify-between">
+               <h2 className="text-3xl font-bold tracking-tight">Intelligence Suite</h2>
+               <p className="text-gray-500">v1.0.0 Stable</p>
             </div>
-            <div className="space-y-4">
-               <LeaderboardRow rank={1} name="Sarah_Real" score={9850} accuracy="99.2%" />
-               <LeaderboardRow rank={2} name="NotABot_99" score={9420} accuracy="98.5%" />
-               <LeaderboardRow rank={3} name="Turing_Test_Passed" score={8900} accuracy="97.8%" />
+
+            <div className="grid md:grid-cols-3 gap-4 auto-rows-[250px]">
+               {/* Resume Card - Large */}
+               <Link href="/services/resume" className="md:col-span-2 row-span-2 group relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 hover:border-zinc-700 transition-all">
+                  <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                     <FileSearch className="w-64 h-64" />
+                  </div>
+                  <div className="relative z-10 h-full flex flex-col justify-between">
+                     <div>
+                        <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
+                           <FileSearch className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-2xl font-bold mb-2">Resume Sanitizer</h3>
+                        <p className="text-gray-400 max-w-md">Recruiters are using AI to filter candidates. Fight back by humanizing your CV to bypass automated rejection and "AI smell" tests.</p>
+                     </div>
+                     <div className="flex items-center gap-2 text-sm font-mono text-accent">
+                        TRY NOW <ArrowRight className="w-4 h-4" />
+                     </div>
+                  </div>
+               </Link>
+
+               {/* Profile Spotter */}
+               <Link href="/services/profile" className="group relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 hover:border-zinc-700 transition-all">
+                  <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
+                     <UserX className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Fake Profile Spotter</h3>
+                  <p className="text-sm text-gray-400">Detect GAN-generated faces and LLM bios on dating apps.</p>
+               </Link>
+
+               {/* Essay Integrity */}
+               <Link href="/services/essay" className="group relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 hover:border-zinc-700 transition-all">
+                   <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4 text-green-400">
+                     <GraduationCap className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Essay Integrity</h3>
+                  <p className="text-sm text-gray-400">Verify academic work against stylometric fingerprints.</p>
+               </Link>
             </div>
          </div>
-      </div>
+      </section>
+
+      {/* Social Proof / Leaderboard Teaser */}
+      <section className="py-24 border-t border-zinc-900">
+         <div className="max-w-5xl mx-auto px-6">
+            <div className="bg-gradient-to-r from-zinc-900 to-black border border-zinc-800 rounded-2xl p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+               <div>
+                  <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+                     <Trophy className="text-yellow-500" /> Hall of Humanity
+                  </h2>
+                  <p className="text-gray-400 mb-6 max-w-lg">
+                     Join 10,000+ verified humans competing to prove their sentience. 
+                     Top scorers get exclusive access to beta tools.
+                  </p>
+                  <div className="flex gap-4">
+                     <div className="flex -space-x-2">
+                        {[1,2,3,4].map(i => (
+                           <div key={i} className="w-8 h-8 rounded-full bg-zinc-700 border-2 border-black" />
+                        ))}
+                     </div>
+                     <span className="text-sm text-gray-500 flex items-center">+2.4k joined today</span>
+                  </div>
+               </div>
+               <Link href="/leaderboard">
+                  <Button size="lg" variant="outline" className="h-14 px-8 text-lg bg-white text-black hover:bg-gray-200 border-none">
+                     View Leaderboard
+                  </Button>
+               </Link>
+            </div>
+         </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-zinc-900 py-12 px-6 text-center text-gray-600 text-sm">
+         <div className="flex items-center justify-center gap-6 mb-8">
+            <Shield className="w-6 h-6 text-zinc-700" />
+            <Lock className="w-6 h-6 text-zinc-700" />
+            <CheckCircle2 className="w-6 h-6 text-zinc-700" />
+         </div>
+         <p>&copy; 2024 NotARobot Inc. Built for the resistance.</p>
+      </footer>
     </main>
   );
-}
-
-function FeatureCard({ title, description, icon, href }: { title: string, description: string, icon: React.ReactNode, href: string }) {
-  return (
-    <Link href={href} className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
-      {icon}
-      <h2 className="mb-3 text-2xl font-semibold">
-        {title}{" "}
-        <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-          -&gt;
-        </span>
-      </h2>
-      <p className="m-0 max-w-[30ch] text-sm opacity-50">
-        {description}
-      </p>
-    </Link>
-  );
-}
-
-function LeaderboardRow({ rank, name, score, accuracy }: { rank: number, name: string, score: number, accuracy: string }) {
-  return (
-    <div className="flex items-center justify-between p-3 rounded bg-white/5">
-       <div className="flex items-center gap-4">
-          <span className={`font-mono font-bold w-6 text-center ${rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-600' : 'text-gray-600'}`}>#{rank}</span>
-          <span className="font-medium">{name}</span>
-       </div>
-       <div className="flex gap-8 text-sm text-gray-400">
-          <span>Score: <span className="text-white">{score}</span></span>
-          <span>Acc: <span className="text-accent">{accuracy}</span></span>
-       </div>
-    </div>
-  )
 }
