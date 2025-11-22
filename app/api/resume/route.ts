@@ -131,6 +131,11 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error("Error processing resume:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: error?.constructor?.name
+    });
     return NextResponse.json(
       { error: "Failed to process resume" },
       { status: 500 }

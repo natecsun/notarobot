@@ -37,10 +37,15 @@ const nextConfig = {
       }
     ]
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push('pdf-parse');
+      // Ignore test files from pdf-parse to prevent build errors
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^\.\/test\//,
+          contextRegExp: /pdf-parse/
+        })
+      );
     }
     return config;
   }
