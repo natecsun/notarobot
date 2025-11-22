@@ -19,15 +19,17 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-xs font-mono mb-8"
+              role="status"
+              aria-live="polite"
             >
-               <Zap className="w-3 h-3" /> POWERED BY GROQ & LLAMA 3
+               <Zap className="w-3 h-3" aria-hidden="true" /> POWERED BY GROQ & LLAMA 3
             </motion.div>
 
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-5xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
+              className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
             >
                The Human Defense <br /> Layer for the Web.
             </motion.h1>
@@ -49,12 +51,12 @@ export default function Home() {
               className="flex flex-col md:flex-row gap-4 justify-center items-center"
             >
                <Link href="/game">
-                  <Button size="lg" className="h-12 px-8 text-base bg-accent text-black hover:bg-accent/90 font-bold w-full md:w-auto">
-                     <Play className="w-4 h-4 mr-2" /> Play Real vs AI
+                  <Button size="lg" className="h-12 px-8 text-base bg-accent text-black hover:bg-accent/90 font-bold w-full md:w-auto focus-ring">
+                     <Play className="w-4 h-4 mr-2" aria-hidden="true" /> Play Real vs AI
                   </Button>
                </Link>
                <Link href="/services/resume">
-                  <Button variant="outline" size="lg" className="h-12 px-8 text-base border-zinc-800 hover:bg-zinc-900 text-gray-300 w-full md:w-auto">
+                  <Button variant="outline" size="lg" className="h-12 px-8 text-base border-zinc-800 hover:bg-zinc-900 text-gray-300 w-full md:w-auto focus-ring">
                      Sanitize Resume
                   </Button>
                </Link>

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { LogOut, User, CreditCard } from "lucide-react"
 import { UpgradeButton } from "@/components/upgrade-button"
 import { CheckoutButton } from "@/components/CheckoutButton"
+import { EmptyState } from "@/components/EmptyState"
 
 import { Confetti } from "@/components/ui/confetti"
 
@@ -118,6 +119,35 @@ export default async function ProfilePage({
                   </div>
 
                   <CheckoutButton />
+               </div>
+            </div>
+
+            {/* Saved Results */}
+            <div className="mt-8">
+               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <CreditCard className="w-6 h-6 text-accent" /> Saved Results
+               </h2>
+               
+               <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+                  <EmptyState 
+                     type="general"
+                     title="No Saved Analyses Yet"
+                     description="Your AI analysis results will appear here once you start using our services."
+                     action={
+                        <div className="flex gap-4 justify-center">
+                           <Link href="/services/resume">
+                              <Button className="bg-accent text-black hover:bg-accent/90">
+                                 Analyze Resume
+                              </Button>
+                           </Link>
+                           <Link href="/services/profile">
+                              <Button variant="outline">
+                                 Check Profile
+                              </Button>
+                           </Link>
+                        </div>
+                     }
+                  />
                </div>
             </div>
          </main>

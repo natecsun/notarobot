@@ -25,9 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(inter.className, "min-h-screen bg-black antialiased text-white")}>
+        <a href="#main-content" className="skip-to-main">
+          Skip to main content
+        </a>
         <VibeLogger />
         <Navbar />
-        {children}
+        <main id="main-content">
+          {children}
+        </main>
         <Footer />
         <SpeedInsights />
         <Analytics />

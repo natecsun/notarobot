@@ -11,14 +11,14 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [user, setUser] = useState<any>(null)
 
-  useState(() => {
+  useEffect(() => {
     const checkUser = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
     }
     checkUser()
-  })
+  }, [])
 
   const handleSubscribe = async (planId: string) => {
     if (!user) {
@@ -38,10 +38,18 @@ export default function PricingPage() {
       if (response.ok) {
         window.location.href = data.url
       } else {
-        alert(data.error || 'Something went wrong')
+        if (data.error?.includes('authentication')) {
+          alert('Please sign in to continue with your subscription.')
+          window.location.href = '/login'
+        } else if (data.error?.includes('stripe')) {
+          alert('Payment service is temporarily unavailable. Please try again in a few minutes.')
+        } else {
+          alert(data.error || 'Unable to process subscription. Please try again.')
+        }
       }
     } catch (error) {
-      alert('Failed to create checkout session')
+      console.error('Subscription error:', error)
+      alert('Unable to connect to payment service. Please check your connection and try again.')
     } finally {
       setLoading(null)
     }
@@ -65,10 +73,18 @@ export default function PricingPage() {
       if (response.ok) {
         window.location.href = data.url
       } else {
-        alert(data.error || 'Something went wrong')
+        if (data.error?.includes('authentication')) {
+          alert('Please sign in to purchase credits.')
+          window.location.href = '/login'
+        } else if (data.error?.includes('stripe')) {
+          alert('Payment service is temporarily unavailable. Please try again in a few minutes.')
+        } else {
+          alert(data.error || 'Unable to purchase credits. Please try again.')
+        }
       }
     } catch (error) {
-      alert('Failed to create checkout session')
+      console.error('Credit purchase error:', error)
+      alert('Unable to connect to payment service. Please check your connection and try again.')
     } finally {
       setLoading(null)
     }
@@ -87,7 +103,7 @@ export default function PricingPage() {
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-6xl font-bold tracking-tight mb-6 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
           >
             Simple, Transparent Pricing
           </motion.h1>
