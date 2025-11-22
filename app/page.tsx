@@ -4,16 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Shield, FileSearch, UserX, GraduationCap, Trophy, Play, CheckCircle2, ArrowRight, Zap, Lock } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { RobotLogo } from "@/components/ui/robot-logo";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-black">
+    <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-white">
       {/* Floating Nav */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-           <div className="font-mono font-bold text-xl tracking-tighter flex items-center gap-2">
-              <div className="w-3 h-3 bg-accent rounded-full animate-pulse" />
-              NOTAROBOT
+           <div className="font-mono font-bold text-xl tracking-tighter flex items-center gap-3">
+              <RobotLogo className="w-8 h-8" />
+              NOTAROBOT.COM
            </div>
            <div className="flex items-center gap-4">
               <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">Sign In</Link>

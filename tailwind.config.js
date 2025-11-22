@@ -9,7 +9,7 @@ module.exports = {
       colors: {
         primary: "#1a1a1a", // Dark/AI theme
         secondary: "#f5f5f5",
-        accent: "#00ff9d", // Matrix-like green for "Not A Robot" vibe
+        accent: "#FF3333", // Red Robot Love
         danger: "#ff4d4d",
       },
       fontFamily: {
