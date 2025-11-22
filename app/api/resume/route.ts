@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
-import * as pdfjsLib from "pdfjs-dist";
+import { pdf } from "pdf-to-img";
 import { cookies } from "next/headers";
 
 const groqPaid = new Groq({
@@ -49,65 +49,61 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File size exceeds 5MB limit." }, { status: 400 });
     }
 
-    // 1. Extract Text from PDF using pdfjs-dist
+    // 1. Convert PDF to images and send directly to vision model
     const arrayBuffer = await file.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
 
-    let resumeText = "";
     try {
-      const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
-      const pdfDocument = await loadingTask.promise;
+      // Convert first 3 pages to images (to limit token usage)
+      const document = await pdf(buffer, { scale: 2 });
+      const images: string[] = [];
 
-      const textParts: string[] = [];
-      for (let i = 1; i <= pdfDocument.numPages; i++) {
-        const page = await pdfDocument.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ');
-        textParts.push(pageText);
+      let pageCount = 0;
+      for await (const page of document) {
+        if (pageCount >= 3) break; // Limit to first 3 pages
+        const base64Image = page.toString('base64');
+        images.push(base64Image);
+        pageCount++;
       }
 
-      resumeText = textParts.join('\n').trim();
-    } catch (e) {
-      console.error("PDF Parse Error:", e);
-      return NextResponse.json({ error: "Failed to parse PDF file." }, { status: 500 });
-    }
+      if (images.length === 0) {
+        return NextResponse.json({ error: "Could not process PDF pages." }, { status: 400 });
+      }
 
-    if (!resumeText || resumeText.length < 50) {
-      return NextResponse.json({ error: "Could not extract text. If this is a scanned PDF, please use a text-based PDF." }, { status: 400 });
-    }
-
-    // Limit text length to avoid token limits (approx 3000 tokens)
-    const truncatedText = resumeText.slice(0, 12000);
-
-    // 2. Send to Groq for Sanitization
-    try {
+      // 2. Send images to Groq vision model for text extraction and rewriting
       const chatCompletion = await client.chat.completions.create({
         messages: [
           {
-            role: "system",
-            content: `You are an expert executive resume writer and career coach. Your goal is to rewrite resumes to sound natural, confident, and human, removing obvious "AI-generated" patterns.
-
-            Guidelines:
-            1.  **Tone**: Professional, confident, yet authentic. Avoid being overly formal or flowery.
-            2.  **Vocabulary**: Replace overused AI buzzwords (e.g., "spearhead", "leverage", "orchestrate", "synergy", "meticulous", "pivotal") with strong, simple action verbs (e.g., "led", "used", "managed", "created", "built").
-            3.  **Structure**: Convert passive voice to active voice. Ensure bullet points are punchy and results-oriented.
-            4.  **Content**: Do NOT summarize. Rewrite the specific bullet points and descriptions provided in the input to be more impactful. Preserve the original meaning and metrics.
-            
-            Output Format:
-            Return a JSON object with exactly two fields:
-            - "analysis": A 1-2 sentence critique of the original text's "vibe" (e.g., "The original text relied heavily on passive voice and generic buzzwords like 'leverage'.").
-            - "rewritten_text": The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate.
-            `
-          },
-          {
             role: "user",
-            content: `Here is the resume text to humanize:\n\n${truncatedText}`
+            content: [
+              {
+                type: "text",
+                text: `You are an expert executive resume writer and career coach. Please analyze this resume and:
+1. Extract all the text content from the resume
+2. Rewrite it to sound natural, confident, and human, removing obvious "AI-generated" patterns
+
+Guidelines for rewriting:
+- **Tone**: Professional, confident, yet authentic. Avoid being overly formal or flowery
+- **Vocabulary**: Replace overused AI buzzwords (e.g., "spearhead", "leverage", "orchestrate", "synergy", "meticulous", "pivotal") with strong, simple action verbs (e.g., "led", "used", "managed", "created", "built")
+- **Structure**: Convert passive voice to active voice. Ensure bullet points are punchy and results-oriented
+- **Content**: Do NOT summarize. Rewrite the specific bullet points and descriptions to be more impactful. Preserve the original meaning and metrics
+
+Return a JSON object with exactly two fields:
+- "analysis": A 1-2 sentence critique of the original resume's "vibe" (e.g., "The original text relied heavily on passive voice and generic buzzwords like 'leverage'.")
+- "rewritten_text": The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate`
+              },
+              ...images.map(img => ({
+                type: "image_url" as const,
+                image_url: {
+                  url: `data:image/png;base64,${img}`
+                }
+              }))
+            ]
           }
         ],
-        model: "llama3-8b-8192", // Fast and efficient
-        temperature: 0.6, // Slightly higher for more natural variation
+        model: "llama-3.2-90b-vision-preview",
+        temperature: 0.6,
+        max_tokens: 4096,
         response_format: { type: "json_object" }
       });
 
@@ -138,6 +134,7 @@ export async function POST(req: Request) {
           { status: 429 }
         );
       }
+      console.error("Groq API Error:", groqError);
       throw groqError; // Re-throw for general error handler
     }
 
