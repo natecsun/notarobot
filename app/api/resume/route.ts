@@ -101,12 +101,23 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
         throw new Error("No response from AI");
       }
 
+      // Clean response text - remove markdown code blocks if present
+      let cleanedResponse = responseText.trim();
+      
+      // Remove ```json and ``` markers if present
+      if (cleanedResponse.startsWith('```json')) {
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedResponse.startsWith('```')) {
+        cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
       // Parse JSON response
       let parsedResponse;
       try {
-        parsedResponse = JSON.parse(responseText);
+        parsedResponse = JSON.parse(cleanedResponse);
       } catch (parseError) {
-        console.error("Failed to parse Claude response:", responseText);
+        console.error("Failed to parse Claude response:", cleanedResponse);
+        console.error("Original response:", responseText);
         throw new Error("Invalid AI response format");
       }
 
