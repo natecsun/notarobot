@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
-const pdf = require("pdf-parse");
+import pdf from "pdf-parse";
 import { cookies } from "next/headers";
 
 const groqPaid = new Groq({

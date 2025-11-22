@@ -1,0 +1,146 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mF:/notarobot[39m
+
+stderr | app/api/resume/route.test.ts > Resume API Route - Unit Tests > Error Handling > should handle Supabase errors gracefully
+Error processing resume: Error: Database connection error
+    at F:\notarobot\app\api\resume\route.test.ts:207:37
+    at file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11
+    at file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26
+    at file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)
+    at runTest (file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runSuite (file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+    at runSuite (file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+
+ [31mΓ¥»[39m app/api/resume/route.test.ts [2m([22m[2m15 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[33m 35086[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mshould be defined[32m 1[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mshould be a function[32m 0[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mAccess Control - Visitor Limits[2m > [22mshould reject visitor when usage count is 2[32m 6[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mAccess Control - Visitor Limits[2m > [22mshould reject visitor when usage count exceeds 2[32m 1[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mAccess Control - User Credits[2m > [22mshould reject user with zero credits[32m 1[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mAccess Control - User Credits[2m > [22mshould reject user with no profile[32m 1[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mFile Upload Validation[2m > [22mshould reject request with no file[32m 2[2mms[22m[39m
+   [32mΓ£ô[39m Resume API Route - Unit Tests[2m > [22mError Handling[2m > [22mshould handle Supabase errors gracefully[32m 5[2mms[22m[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould process resume for authenticated user with credits[39m[33m 5011[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould use correct Groq model and parameters[39m[33m 5012[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould handle PDF parsing errors[39m[33m 5004[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould reject files larger than 5MB[39m[33m 5011[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould reject scanned/empty PDFs[39m[33m 5004[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould handle rate limit errors from Groq[39m[33m 5009[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m Resume API Route - Integration Tests[2m > [22mshould handle empty Groq response[39m[33m 5016[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 7 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should process resume for authenticated user with credits
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:250:3
+    248|   });
+    249| 
+    250|   it('should process resume for authenticated user with credits', asynΓÇª
+       |   ^
+    251|     mockGetUser.mockResolvedValue({
+    252|       data: { user: { id: 'user-456' } },
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/7]ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should use correct Groq model and parameters
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:296:3
+    294|   });
+    295| 
+    296|   it('should use correct Groq model and parameters', async () => {
+       |   ^
+    297|     mockGetUser.mockResolvedValue({
+    298|       data: { user: { id: 'user-789' } },
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/7]ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should handle PDF parsing errors
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:336:3
+    334|   });
+    335| 
+    336|   it('should handle PDF parsing errors', async () => {
+       |   ^
+    337|     mockGetUser.mockResolvedValue({
+    338|       data: { user: { id: 'user-error' } },
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/7]ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should reject files larger than 5MB
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:363:3
+    361|   });
+    362| 
+    363|   it('should reject files larger than 5MB', async () => {
+       |   ^
+    364|     mockGetUser.mockResolvedValue({ data: { user: null }, error: null ΓÇª
+    365|     mockGetCookie.mockReturnValue({ value: '0' });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/7]ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should reject scanned/empty PDFs
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:388:3
+    386|   });
+    387| 
+    388|   it('should reject scanned/empty PDFs', async () => {
+       |   ^
+    389|     mockGetUser.mockResolvedValue({
+    390|       data: { user: { id: 'user-scanned' } },
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/7]ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should handle rate limit errors from Groq
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:412:3
+    410|   });
+    411| 
+    412|   it('should handle rate limit errors from Groq', async () => {
+       |   ^
+    413|     mockGetUser.mockResolvedValue({
+    414|       data: { user: { id: 'user-rate' } },
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/7]ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should handle empty Groq response
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» app/api/resume/route.test.ts:444:3
+    442|   });
+    443| 
+    444|   it('should handle empty Groq response', async () => {
+       |   ^
+    445|     mockGetUser.mockResolvedValue({
+    446|       data: { user: { id: 'user-empty' } },
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/7]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 08:46:43
+[2m   Duration [22m 36.45s[2m (transform 59ms, setup 79ms, collect 68ms, tests 35.09s, environment 621ms, prepare 96ms)[22m
+

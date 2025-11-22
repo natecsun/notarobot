@@ -1,0 +1,58 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mF:/notarobot[39m
+
+[90mstdout[2m | app/api/resume/route.test.ts[2m > [22m[2mResume API Route - Integration Tests[2m > [22m[2mshould handle rate limit errors from Groq
+[22m[39mDEBUG: File received resume.pdf [33m8[39m
+DEBUG: Extracting text
+
+stderr | app/api/resume/route.test.ts > Resume API Route - Integration Tests > should handle rate limit errors from Groq
+Error processing resume: TypeError: file.arrayBuffer is not a function
+    at POST (F:\notarobot\app\api\resume\route.ts:57:36)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at F:\notarobot\app\api\resume\route.test.ts:426:22
+    at file:///F:/notarobot/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20
+
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mshould be defined
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mshould be a function
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mAccess Control - Visitor Limits[2m > [22mshould reject visitor when usage count is 2
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mAccess Control - Visitor Limits[2m > [22mshould reject visitor when usage count exceeds 2
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mAccess Control - User Credits[2m > [22mshould reject user with zero credits
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mAccess Control - User Credits[2m > [22mshould reject user with no profile
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mFile Upload Validation[2m > [22mshould reject request with no file
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Unit Tests[2m > [22mError Handling[2m > [22mshould handle Supabase errors gracefully
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould process resume for authenticated user with credits
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould use correct Groq model and parameters
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould handle PDF parsing errors
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould reject files larger than 5MB
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould reject scanned/empty PDFs
+ [31m├ù[39m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould handle rate limit errors from Groq[32m 13[2mms[22m[39m
+[31m   ΓåÆ expected 500 to be 429 // Object.is equality[39m
+ [2m[90mΓåô[39m[22m app/api/resume/route.test.ts[2m > [22mResume API Route - Integration Tests[2m > [22mshould handle empty Groq response
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  app/api/resume/route.test.ts > Resume API Route - Integration Tests > should handle rate limit errors from Groq
+AssertionError: expected 500 to be 429 // Object.is equality
+
+- Expected
++ Received
+
+- 429
++ 500
+
+ Γ¥» app/api/resume/route.test.ts:429:29
+    427|     const data = await response.json();
+    428| 
+    429|     expect(response.status).toBe(429);
+       |                             ^
+    430|     expect(data.error).toContain('under heavy load');
+    431|     expect(mockSendTelegramAlert).toHaveBeenCalledWith('CRITICAL: ResuΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m14 skipped[39m[90m (15)[39m
+[2m   Start at [22m 08:54:49
+[2m   Duration [22m 1.38s[2m (transform 62ms, setup 77ms, collect 67ms, tests 14ms, environment 618ms, prepare 106ms)[22m
+
