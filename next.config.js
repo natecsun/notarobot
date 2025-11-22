@@ -39,17 +39,12 @@ const nextConfig = {
   },
   webpack: (config, { isServer, webpack }) => {
     if (isServer) {
-      // Ignore test files from pdf-parse to prevent build errors
+      // Replace pdf-parse test directory with empty module to prevent build errors
       config.plugins.push(
-        new webpack.IgnorePlugin({
-          checkResource(resource, context) {
-            // Ignore all test files and test data from pdf-parse
-            if (context.includes('pdf-parse') && (resource.includes('test') || resource.includes('/test/'))) {
-              return true;
-            }
-            return false;
-          }
-        })
+        new webpack.NormalModuleReplacementPlugin(
+          /pdf-parse[/\\]test/,
+          require.resolve('./lib/empty-module.js')
+        )
       );
     }
     return config;
