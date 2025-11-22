@@ -119,14 +119,14 @@ export default function ResumePage() {
           {/* Results Section */}
           <div className="space-y-4">
             {result ? (
-              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-lg animate-in fade-in slide-in-from-bottom-4">
+              <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-lg animate-in fade-in slide-in-from-bottom-4">
                  <div className="flex items-center gap-2 mb-4 text-green-500 font-bold">
                     <CheckCircle className="w-5 h-5" /> Analysis Complete
                  </div>
                  
                  <div className="mb-6 bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
                     <h4 className="text-sm font-bold text-yellow-600 mb-1">AI Detection Analysis</h4>
-                    <p className="text-sm italic text-yellow-700 dark:text-yellow-400">"{result.analysis}"</p>
+                    <p className="text-sm italic text-yellow-400">"{result.analysis}"</p>
                  </div>
 
                  <div>
@@ -134,13 +134,13 @@ export default function ResumePage() {
                        <span>Humanized Version</span>
                        <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">Optimized</span>
                     </h4>
-                    <div className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap font-serif leading-relaxed bg-zinc-50 dark:bg-black/20 p-4 rounded border border-zinc-200 dark:border-zinc-800 h-[400px] overflow-y-auto">
+                    <div className="text-sm text-gray-300 whitespace-pre-wrap font-serif leading-relaxed bg-black/20 p-4 rounded border border-zinc-800 h-[400px] overflow-y-auto">
                        {result.rewritten_text}
                     </div>
                  </div>
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 p-8 text-center min-h-[300px]">
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 border border-zinc-800 rounded-xl bg-zinc-900/50 p-8 text-center min-h-[300px]">
                  <FileText className="w-12 h-12 mb-4 opacity-20" />
                  <p>Upload a file to see the magic happen.</p>
               </div>

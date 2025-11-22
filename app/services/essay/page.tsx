@@ -94,7 +94,7 @@ export default function EssayPage() {
             {/* Results Area */}
             <div className="space-y-4">
                 {result ? (
-                  <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-lg animate-in fade-in slide-in-from-bottom-4 h-full">
+                  <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-lg animate-in fade-in slide-in-from-bottom-4 h-full">
                      <div className={`text-center p-4 rounded-lg mb-6 border ${
                          result.ai_probability > 70 ? 'bg-red-500/10 border-red-500 text-red-500' : 
                          result.ai_probability < 30 ? 'bg-green-500/10 border-green-500 text-green-500' : 

@@ -160,14 +160,14 @@ export function RealOrAI() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-xl border border-zinc-200 dark:border-zinc-800 min-h-[300px] flex flex-col justify-center items-center text-center"
+            className="bg-zinc-900 rounded-xl p-8 shadow-xl border border-zinc-800 min-h-[300px] flex flex-col justify-center items-center text-center"
           >
             {currentItem.type === 'text' ? (
-              <p className="text-xl md:text-2xl font-serif leading-relaxed">
+              <p className="text-xl md:text-2xl font-serif leading-relaxed text-white">
                 "{currentItem.content}"
               </p>
             ) : (
-              <div className="bg-gray-200 w-full h-64 flex items-center justify-center text-gray-500">
+              <div className="bg-zinc-800 w-full h-64 flex items-center justify-center text-gray-400 rounded-lg">
                 [Image Placeholder]
               </div>
             )}
