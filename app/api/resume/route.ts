@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import Anthropic from "@anthropic-ai/sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
 const groqPaid = new Groq({
   apiKey: process.env.GROQ_API_KEY_PAID || process.env.GROQ_API_KEY,
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export async function POST(req: Request) {
@@ -36,9 +41,6 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
-    // Use paid client for credit users
-    const client = groqPaid;
-
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
@@ -48,18 +50,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File size exceeds 5MB limit." }, { status: 400 });
     }
 
-    // Convert File to base64 for Groq vision model
+    // Convert PDF to base64 for Claude
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const base64Pdf = buffer.toString('base64');
 
     try {
-      // Send PDF to Groq vision model via data URL
-      const chatCompletion = await client.chat.completions.create({
+      // Use Claude to extract and rewrite resume text from PDF
+      const message = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 4096,
         messages: [
           {
             role: "user",
             content: [
+              {
+                type: "document",
+                source: {
+                  type: "base64",
+                  media_type: "application/pdf",
+                  data: base64Pdf
+                }
+              },
               {
                 type: "text",
                 text: `You are an expert executive resume writer and career coach. Please analyze this resume PDF and:
@@ -72,29 +84,30 @@ Guidelines for rewriting:
 - **Structure**: Convert passive voice to active voice. Ensure bullet points are punchy and results-oriented
 - **Content**: Do NOT summarize. Rewrite the specific bullet points and descriptions to be more impactful. Preserve the original meaning and metrics
 
-Return a JSON object with exactly two fields:
-- "analysis": A 1-2 sentence critique of the original resume's "vibe" (e.g., "The original text relied heavily on passive voice and generic buzzwords like 'leverage'.")
-- "rewritten_text": The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate`
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:application/pdf;base64,${base64Pdf}`
-                }
+Return ONLY a JSON object with exactly two fields (no markdown formatting):
+{
+  "analysis": "A 1-2 sentence critique of the original resume's vibe",
+  "rewritten_text": "The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate"
+}`
               }
             ]
           }
-        ],
-        model: "llama-3.2-90b-vision-preview",
-        temperature: 0.6,
-        max_tokens: 4096,
-        response_format: { type: "json_object" }
+        ]
       });
 
-      const responseContent = chatCompletion.choices[0]?.message?.content;
+      const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
-      if (!responseContent) {
+      if (!responseText) {
         throw new Error("No response from AI");
+      }
+
+      // Parse JSON response
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse Claude response:", responseText);
+        throw new Error("Invalid AI response format");
       }
 
       // Deduct credit OR increment visitor cookie
@@ -103,23 +116,25 @@ Return a JSON object with exactly two fields:
       } else {
         // Increment visitor usage
         const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(JSON.parse(responseContent));
+        const response = NextResponse.json(parsedResponse);
         response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 }); // 30 days
         return response;
       }
 
-      return NextResponse.json(JSON.parse(responseContent));
+      return NextResponse.json(parsedResponse);
 
-    } catch (groqError: any) {
-      if (groqError.status === 429) {
+    } catch (apiError: any) {
+      console.error("API Error:", apiError);
+
+      if (apiError.status === 429) {
         sendTelegramAlert("CRITICAL: Resume API Rate Limit Hit!");
         return NextResponse.json(
           { error: "System is under heavy load. Please try again shortly." },
           { status: 429 }
         );
       }
-      console.error("Groq API Error:", groqError);
-      throw groqError; // Re-throw for general error handler
+
+      throw apiError; // Re-throw for general error handler
     }
 
   } catch (error) {
