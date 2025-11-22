@@ -1,20 +1,48 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Upload, FileText, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Loader2, CheckCircle, Copy, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/utils/supabase/client";
 
 export default function ResumePage() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [result, setResult] = useState<{ analysis: string; rewritten_text: string } | null>(null);
-  const [tier, setTier] = useState<'free' | 'paid'>('free');
+  const [error, setError] = useState<string | null>(null);
+  const [userStatus, setUserStatus] = useState<{ type: 'visitor' | 'pro', credits?: number, visitorUsage?: number }>({ type: 'visitor' });
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('credits')
+          .eq('id', user.id)
+          .single();
+        setUserStatus({ type: 'pro', credits: profile?.credits || 0 });
+      } else {
+        // Check visitor cookie client-side or just assume visitor for now
+        // Note: Actual enforcement is on backend, this is just for UI
+        const match = document.cookie.match(new RegExp('(^| )visitor_usage=([^;]+)'));
+        const usage = match ? parseInt(match[2]) : 0;
+        setUserStatus({ type: 'visitor', visitorUsage: usage });
+      }
+    };
+    checkStatus();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
-      setResult(null); // Reset previous results
+      setResult(null);
+      setError(null);
     }
   };
 
@@ -22,10 +50,11 @@ export default function ResumePage() {
     if (!file) return;
 
     setIsUploading(true);
+    setError(null);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("tier", tier);
 
       const response = await fetch("/api/resume", {
         method: "POST",
@@ -35,116 +64,212 @@ export default function ResumePage() {
       const data = await response.json();
       if (response.ok) {
         setResult(data);
+        // Update local status optimistically
+        if (userStatus.type === 'pro' && userStatus.credits) {
+          setUserStatus(prev => ({ ...prev, credits: (prev.credits || 0) - 1 }));
+        } else if (userStatus.type === 'visitor') {
+          setUserStatus(prev => ({ ...prev, visitorUsage: (prev.visitorUsage || 0) + 1 }));
+        }
       } else {
-        alert("Error: " + data.error);
+        setError(data.error || "Something went wrong");
       }
-    } catch (error) {
-      alert("Something went wrong. Please try again.");
+    } catch (err) {
+      setError("Failed to connect to the server. Please try again.");
     } finally {
       setIsUploading(false);
     }
   };
 
+  const copyToClipboard = () => {
+    if (result?.rewritten_text) {
+      navigator.clipboard.writeText(result.rewritten_text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <main className="min-h-screen p-4 md:p-24 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-            <Link href="/">
-                <Button variant="ghost" className="gap-2 pl-0">
-                <ArrowLeft className="w-4 h-4" /> Back to Home
-                </Button>
-            </Link>
-            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
-                <button 
-                    onClick={() => setTier('free')}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${tier === 'free' ? 'bg-white dark:bg-black shadow text-black dark:text-white font-bold' : 'text-gray-500'}`}
-                >
-                    Free
-                </button>
-                <button 
-                    onClick={() => setTier('paid')}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${tier === 'paid' ? 'bg-accent text-black font-bold shadow' : 'text-gray-500'}`}
-                >
-                    Pro
-                </button>
-            </div>
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-12">
+          <Link href="/">
+            <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-primary transition-colors">
+              <ArrowLeft className="w-4 h-4" /> Back to Home
+            </Button>
+          </Link>
+
+          <div className="flex items-center gap-3 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 px-4 py-2 rounded-full shadow-sm">
+            <div className={`w-2 h-2 rounded-full ${userStatus.type === 'pro' ? 'bg-green-500' : 'bg-blue-500'}`} />
+            <span className="text-sm font-medium">
+              {userStatus.type === 'pro'
+                ? `Pro Member (${userStatus.credits} Credits)`
+                : `Visitor Mode (${Math.max(0, 2 - (userStatus.visitorUsage || 0))} uses left)`}
+            </span>
+          </div>
         </div>
 
-        <h1 className="text-4xl font-bold mb-4">Resume Sanitizer</h1>
-        <p className="text-gray-500 mb-12">
-          Upload your resume PDF. We will analyze the text patterns, sentence structures, and vocabulary to detect "AI-speak" and suggest more human alternatives.
-        </p>
+        <div className="text-center mb-16 space-y-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 bg-clip-text text-transparent"
+          >
+            Resume Sanitizer
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto"
+          >
+            Transform your resume from "AI-generated" to "Human-crafted". We remove the buzzwords and restore the authenticity.
+          </motion.p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Upload Section */}
-          <div>
-            <div className="border-2 border-dashed border-zinc-700 rounded-xl p-12 text-center hover:bg-zinc-900/50 transition-colors relative">
-              <input 
-                type="file" 
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 relative overflow-hidden
+                ${file ? 'border-primary/50 bg-primary/5' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/50'}
+            `}>
+              <input
+                type="file"
                 accept="application/pdf"
                 onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold mb-2">
-                {file ? file.name : "Drop your resume here"}
-              </h3>
-              <p className="text-sm text-gray-500 mb-6">Supports PDF (Max 5MB)</p>
-              <Button variant={file ? "outline" : "default"} className="pointer-events-none">
-                {file ? "Change File" : "Select File"}
-              </Button>
+
+              <AnimatePresence mode="wait">
+                {!file ? (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Upload className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold">Drop your resume PDF here</h3>
+                    <p className="text-sm text-gray-500">Max file size: 5MB</p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="selected"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="space-y-6"
+                  >
+                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <FileText className="w-10 h-10 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-primary">{file.name}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="relative z-20">
+                      Change File
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {file && (
-              <div className="mt-4">
-                <Button 
-                  onClick={handleAnalyze} 
-                  disabled={isUploading} 
-                  className="w-full py-6 text-lg gap-2"
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400"
                 >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" /> Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="w-5 h-5" /> Humanize My Resume
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <p className="text-sm font-medium">{error}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <Button
+              onClick={handleAnalyze}
+              disabled={!file || isUploading}
+              className="w-full mt-6 py-8 text-lg font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:shadow-none"
+            >
+              {isUploading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Analyzing Resume...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  <span>Humanize My Resume</span>
+                </div>
+              )}
+            </Button>
+          </motion.div>
 
           {/* Results Section */}
-          <div className="space-y-4">
-            {result ? (
-              <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-lg animate-in fade-in slide-in-from-bottom-4">
-                 <div className="flex items-center gap-2 mb-4 text-green-500 font-bold">
-                    <CheckCircle className="w-5 h-5" /> Analysis Complete
-                 </div>
-                 
-                 <div className="mb-6 bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
-                    <h4 className="text-sm font-bold text-yellow-600 mb-1">AI Detection Analysis</h4>
-                    <p className="text-sm italic text-yellow-400">"{result.analysis}"</p>
-                 </div>
-
-                 <div>
-                    <h4 className="font-bold mb-2 flex items-center justify-between">
-                       <span>Humanized Version</span>
-                       <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">Optimized</span>
-                    </h4>
-                    <div className="text-sm text-gray-300 whitespace-pre-wrap font-serif leading-relaxed bg-black/20 p-4 rounded border border-zinc-800 h-[400px] overflow-y-auto">
-                       {result.rewritten_text}
+          <div className="relative min-h-[400px]">
+            <AnimatePresence mode="wait">
+              {result ? (
+                <motion.div
+                  key="result"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden"
+                >
+                  <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-500 font-bold mb-4">
+                      <CheckCircle className="w-5 h-5" /> Analysis Complete
                     </div>
-                 </div>
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 border border-zinc-800 rounded-xl bg-zinc-900/50 p-8 text-center min-h-[300px]">
-                 <FileText className="w-12 h-12 mb-4 opacity-20" />
-                 <p>Upload a file to see the magic happen.</p>
-              </div>
-            )}
+
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl">
+                      <h4 className="text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase tracking-wider mb-2">AI Detection Analysis</h4>
+                      <p className="text-sm text-yellow-800 dark:text-yellow-200 italic leading-relaxed">"{result.analysis}"</p>
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-bold text-lg">Humanized Version</h4>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={copyToClipboard}
+                        className="gap-2 text-xs"
+                      >
+                        {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                        {copied ? "Copied!" : "Copy Text"}
+                      </Button>
+                    </div>
+                    <div className="bg-zinc-50 dark:bg-black/40 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 h-[500px] overflow-y-auto font-serif leading-relaxed text-zinc-800 dark:text-zinc-300 whitespace-pre-wrap text-sm shadow-inner">
+                      {result.rewritten_text}
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="placeholder"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="h-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 p-12 text-center"
+                >
+                  <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+                    <FileText className="w-8 h-8 opacity-20" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Waiting for Resume</h3>
+                  <p className="text-sm max-w-xs mx-auto">Upload your resume on the left to see the AI analysis and humanized version here.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

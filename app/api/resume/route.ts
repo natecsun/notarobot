@@ -2,14 +2,12 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pdf = require("pdf-parse");
+import { cookies } from "next/headers";
 
 const groqPaid = new Groq({
   apiKey: process.env.GROQ_API_KEY_PAID || process.env.GROQ_API_KEY,
 });
-
-import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -46,11 +44,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
+    // Validate file size (Max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "File size exceeds 5MB limit." }, { status: 400 });
+    }
+
     // 1. Extract Text from PDF
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const data = await pdf(buffer);
-    const resumeText = data.text;
+
+    let resumeText = "";
+    try {
+      const data = await pdf(buffer);
+      resumeText = data.text.trim();
+    } catch (e) {
+      console.error("PDF Parse Error:", e);
+      return NextResponse.json({ error: "Failed to parse PDF file." }, { status: 500 });
+    }
+
+    if (!resumeText || resumeText.length < 50) {
+      return NextResponse.json({ error: "Could not extract text. If this is a scanned PDF, please use a text-based PDF." }, { status: 400 });
+    }
 
     // Limit text length to avoid token limits (approx 3000 tokens)
     const truncatedText = resumeText.slice(0, 12000);
@@ -61,25 +75,27 @@ export async function POST(req: Request) {
         messages: [
           {
             role: "system",
-            content: `You are a professional career coach and resume editor. Your goal is to "humanize" resumes that sound like they were written by AI.
+            content: `You are an expert executive resume writer and career coach. Your goal is to rewrite resumes to sound natural, confident, and human, removing obvious "AI-generated" patterns.
+
+            Guidelines:
+            1.  **Tone**: Professional, confident, yet authentic. Avoid being overly formal or flowery.
+            2.  **Vocabulary**: Replace overused AI buzzwords (e.g., "spearhead", "leverage", "orchestrate", "synergy", "meticulous", "pivotal") with strong, simple action verbs (e.g., "led", "used", "managed", "created", "built").
+            3.  **Structure**: Convert passive voice to active voice. Ensure bullet points are punchy and results-oriented.
+            4.  **Content**: Do NOT summarize. Rewrite the specific bullet points and descriptions provided in the input to be more impactful. Preserve the original meaning and metrics.
             
-            Specific Instructions:
-            1. Remove robotic buzzwords like "leverage", "utilize", "spearhead", "synergy", "meticulous".
-            2. Rewrite passive voice to active voice.
-            3. Keep the tone professional but conversational and authentic.
-            4. Do not summarize. Rewrite the key bullet points to be impactful.
-            5. Return the response in JSON format with two fields: 
-               - "analysis": A short 1-sentence critique of the original vibe.
-               - "rewritten_text": The improved version of the resume text.
+            Output Format:
+            Return a JSON object with exactly two fields:
+            - "analysis": A 1-2 sentence critique of the original text's "vibe" (e.g., "The original text relied heavily on passive voice and generic buzzwords like 'leverage'.").
+            - "rewritten_text": The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate.
             `
           },
           {
             role: "user",
-            content: `Here is the resume text:\n\n${truncatedText}`
+            content: `Here is the resume text to humanize:\n\n${truncatedText}`
           }
         ],
         model: "llama3-8b-8192", // Fast and efficient
-        temperature: 0.5,
+        temperature: 0.6, // Slightly higher for more natural variation
         response_format: { type: "json_object" }
       });
 
