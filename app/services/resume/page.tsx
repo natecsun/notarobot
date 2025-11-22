@@ -1,11 +1,51 @@
+"use client"
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Upload, FileText } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Loader2, CheckCircle } from "lucide-react";
 
 export default function ResumePage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [result, setResult] = useState<{ analysis: string; rewritten_text: string } | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setResult(null); // Reset previous results
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setResult(data);
+      } else {
+        alert("Error analyzing resume: " + data.error);
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen p-4 md:p-24 bg-grid-slate-900/[0.04] dark:bg-grid-slate-400/[0.05]">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <Link href="/" className="inline-block mb-8">
             <Button variant="ghost" className="gap-2 pl-0">
               <ArrowLeft className="w-4 h-4" /> Back to Home
@@ -17,30 +57,77 @@ export default function ResumePage() {
           Upload your resume PDF. We will analyze the text patterns, sentence structures, and vocabulary to detect "AI-speak" and suggest more human alternatives.
         </p>
 
-        <div className="border-2 border-dashed border-zinc-700 rounded-xl p-12 text-center hover:bg-zinc-900/50 transition-colors cursor-pointer">
-           <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-           <h3 className="text-xl font-semibold mb-2">Drop your resume here</h3>
-           <p className="text-sm text-gray-500 mb-6">Supports PDF, DOCX (Max 5MB)</p>
-           <Button>Select File</Button>
-        </div>
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Upload Section */}
+          <div>
+            <div className="border-2 border-dashed border-zinc-700 rounded-xl p-12 text-center hover:bg-zinc-900/50 transition-colors relative">
+              <input 
+                type="file" 
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-xl font-semibold mb-2">
+                {file ? file.name : "Drop your resume here"}
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">Supports PDF (Max 5MB)</p>
+              <Button variant={file ? "outline" : "default"} className="pointer-events-none">
+                {file ? "Change File" : "Select File"}
+              </Button>
+            </div>
 
-        <div className="mt-12 bg-zinc-900 p-6 rounded-lg border border-zinc-800">
-           <h3 className="font-bold flex items-center gap-2 mb-4">
-              <FileText className="w-4 h-4 text-accent" /> Sample Output
-           </h3>
-           <div className="space-y-4 text-sm">
-              <div className="bg-red-500/10 p-3 rounded border border-red-500/20">
-                 <p className="text-red-400 line-through mb-1">"I am a highly motivated individual with a plethora of experience in leveraging synergies..."</p>
-                 <p className="text-xs text-red-500 uppercase font-bold">AI Probability: 98%</p>
+            {file && (
+              <div className="mt-4">
+                <Button 
+                  onClick={handleAnalyze} 
+                  disabled={isUploading} 
+                  className="w-full py-6 text-lg gap-2"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-5 h-5" /> Humanize My Resume
+                    </>
+                  )}
+                </Button>
               </div>
-              <div className="flex justify-center">
-                 <span className="text-gray-500 text-xs">REPLACED WITH</span>
+            )}
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-4">
+            {result ? (
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-lg animate-in fade-in slide-in-from-bottom-4">
+                 <div className="flex items-center gap-2 mb-4 text-green-500 font-bold">
+                    <CheckCircle className="w-5 h-5" /> Analysis Complete
+                 </div>
+                 
+                 <div className="mb-6 bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
+                    <h4 className="text-sm font-bold text-yellow-600 mb-1">AI Detection Analysis</h4>
+                    <p className="text-sm italic text-yellow-700 dark:text-yellow-400">"{result.analysis}"</p>
+                 </div>
+
+                 <div>
+                    <h4 className="font-bold mb-2 flex items-center justify-between">
+                       <span>Humanized Version</span>
+                       <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">Optimized</span>
+                    </h4>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap font-serif leading-relaxed bg-zinc-50 dark:bg-black/20 p-4 rounded border border-zinc-200 dark:border-zinc-800 h-[400px] overflow-y-auto">
+                       {result.rewritten_text}
+                    </div>
+                 </div>
               </div>
-              <div className="bg-green-500/10 p-3 rounded border border-green-500/20">
-                 <p className="text-green-400">"I have 5 years of experience leading cross-functional teams to improve workflow efficiency..."</p>
-                 <p className="text-xs text-green-500 uppercase font-bold">Human Score: 100%</p>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 p-8 text-center min-h-[300px]">
+                 <FileText className="w-12 h-12 mb-4 opacity-20" />
+                 <p>Upload a file to see the magic happen.</p>
               </div>
-           </div>
+            )}
+          </div>
         </div>
       </div>
     </main>
