@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import pdf from "pdf-parse";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pdf = require("pdf-parse");
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
