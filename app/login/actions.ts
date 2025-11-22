@@ -58,7 +58,7 @@ export async function signInWithGoogle() {
   if (data.url) {
     redirect(data.url)
   }
-  
+
   if (error) {
     redirect('/login?error=Could not initiate Google login')
   }

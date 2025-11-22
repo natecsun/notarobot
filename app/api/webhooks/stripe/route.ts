@@ -1,11 +1,8 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { stripe } from "@/utils/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
-});
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -28,7 +25,7 @@ export async function POST(req: Request) {
 
     if (userId) {
       const supabase = createAdminClient();
-      
+
       // Upgrade user to Pro
       const { error } = await supabase
         .from("profiles")
@@ -39,7 +36,7 @@ export async function POST(req: Request) {
         console.error("Error updating profile:", error);
         return NextResponse.json({ error: "Database update failed" }, { status: 500 });
       }
-      
+
       console.log(`User ${userId} upgraded to Pro!`);
     }
   }

@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import { stripe } from "@/utils/stripe";
 import { createClient } from "@/utils/supabase/server";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
-});
 
 export async function POST(req: Request) {
   const supabase = createClient();
@@ -30,7 +26,7 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      mode: "payment", // One-time payment. Use 'subscription' if you want recurring.
+      mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?canceled=true`,
       customer_email: user.email,
@@ -41,7 +37,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Stripe Checkout Error:", err);
+    return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
   }
 }
