@@ -22,7 +22,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "i am lost", href: "/", style: "text-gray-600 hover:text-white" },
       { text: "i am looking", href: "/maze/corridor-1", style: "text-green-500 underline decoration-wavy hover:text-green-300 ml-8" },
-      { text: "dial up", href: "/maze/dial-up", style: "block mt-8 text-xs text-blue-500" }
+      { text: "dial up", href: "/maze/dial-up", style: "block mt-8 text-xs text-blue-500" },
+      { text: "wayne?", href: "/maze/wayne", style: "text-zinc-800 hover:text-zinc-600 absolute bottom-4 right-4" }
     ]
   },
   "corridor-1": {
@@ -34,7 +35,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "run forward", href: "/maze/room-red", style: "text-xl font-bold hover:scale-110 inline-block" },
       { text: "look closely", href: "/maze/detail", style: "text-xs text-blue-300 absolute bottom-10 right-10" },
-      { text: "enter the vents", href: "/maze/basement", style: "opacity-20 hover:opacity-100 absolute top-10 left-10" }
+      { text: "enter the vents", href: "/maze/basement", style: "opacity-20 hover:opacity-100 absolute top-10 left-10" },
+      { text: "queens arcade", href: "/maze/queens-arcade", style: "text-yellow-400 ml-8 font-mono" }
     ]
   },
   "room-red": {
@@ -46,7 +48,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "restart", href: "/maze/start", style: "border-2 border-black p-2 hover:bg-black hover:text-red-600" },
       { text: "ignore warning", href: "/maze/garden", style: "opacity-10 hover:opacity-100 transition-opacity duration-1000 mt-12 block" },
-      { text: "panic", href: "/maze/void", style: "animate-pulse text-white ml-4" }
+      { text: "panic", href: "/maze/void", style: "animate-pulse text-white ml-4" },
+      { text: "blame johnny", href: "/maze/johnny", style: "text-xs mt-4 block" }
     ]
   },
   "garden": {
@@ -58,7 +61,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "pick a flower", href: "/maze/flower", style: "text-pink-500 hover:text-white" },
       { text: "water the plants", href: "/maze/ocean", style: "text-blue-400 ml-4" },
-      { text: "dig a hole", href: "/maze/trash-can", style: "text-amber-700 block mt-4" }
+      { text: "dig a hole", href: "/maze/trash-can", style: "text-amber-700 block mt-4" },
+      { text: "look for armando", href: "/maze/armando", style: "text-purple-400 ml-8 italic" }
     ]
   },
   "ocean": {
@@ -70,7 +74,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "swim up", href: "/maze/garden", style: "text-lg" },
       { text: "drown", href: "/maze/void", style: "text-xs text-black bg-blue-900 p-1" },
-      { text: "follow the cable", href: "/maze/mainframe", style: "text-cyan-400 font-mono block mt-8" }
+      { text: "follow the cable", href: "/maze/mainframe", style: "text-cyan-400 font-mono block mt-8" },
+      { text: "visit lewisburg", href: "/maze/lewisburg", style: "text-slate-400 ml-4 opacity-50" }
     ]
   },
   "detail": {
@@ -82,7 +87,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "zoom out", href: "/maze/corridor-1", style: "underline" },
       { text: "touch it", href: "/randy", style: "text-yellow-500 font-bold ml-4" },
-      { text: "analyze", href: "/maze/library", style: "text-xs text-gray-400 block mt-12" }
+      { text: "analyze", href: "/maze/library", style: "text-xs text-gray-400 block mt-12" },
+      { text: "check for fingerprints", href: "/maze/fingerprints", style: "text-red-600 ml-4 text-xs" }
     ]
   },
   "flower": {
@@ -93,7 +99,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     textColor: "text-gray-400",
     links: [
       { text: "leave", href: "/", style: "text-white" },
-      { text: "recycle", href: "/maze/trash-can", style: "text-green-500 ml-4" }
+      { text: "recycle", href: "/maze/trash-can", style: "text-green-500 ml-4" },
+      { text: "cut yourself", href: "/maze/can-lady", style: "text-red-800 ml-4 font-serif" }
     ]
   },
   "dial-up": {
@@ -116,7 +123,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "scream", href: "/maze/void", style: "text-gray-800" },
       { text: "wait", href: "/maze/waiting-room", style: "text-gray-800 ml-4" },
-      { text: "light a match", href: "/maze/firewall", style: "text-red-900 font-bold ml-4" }
+      { text: "light a match", href: "/maze/firewall", style: "text-red-900 font-bold ml-4" },
+      { text: "go to mars", href: "/maze/mars", style: "text-red-900 ml-4" }
     ]
   },
   "old-chat": {
@@ -160,7 +168,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     textColor: "text-gray-500",
     links: [
       { text: "restore all", href: "/maze/start", style: "text-green-600 font-bold" },
-      { text: "empty bin", href: "/maze/void", style: "text-red-600 ml-4" }
+      { text: "empty bin", href: "/maze/void", style: "text-red-600 ml-4" },
+      { text: "look for johnny", href: "/maze/johnny", style: "text-blue-400 ml-4 text-xs" }
     ]
   },
   "waiting-room": {
@@ -182,7 +191,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     textColor: "text-amber-100",
     links: [
       { text: "Sector 999", href: "/maze/mirror", style: "font-serif italic" },
-      { text: "Check index", href: "/maze/mainframe", style: "font-mono ml-4" }
+      { text: "Check index", href: "/maze/mainframe", style: "font-mono ml-4" },
+      { text: "Read poem", href: "/maze/secret-poem", style: "text-amber-300 ml-4 underline" }
     ]
   },
   "mainframe": {
@@ -194,7 +204,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     links: [
       { text: "sudo reboot", href: "/maze/room-red", style: "text-red-500" },
       { text: "cat /var/log/secrets", href: "/randy", style: "text-yellow-500 ml-4" },
-      { text: "ping localhost", href: "/maze/mirror", style: "ml-4" }
+      { text: "ping localhost", href: "/maze/mirror", style: "ml-4" },
+      { text: "check oil levels", href: "/maze/10w-40", style: "text-gray-500 ml-4" }
     ]
   },
   "mirror": {
@@ -239,7 +250,8 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     textColor: "text-amber-800",
     links: [
       { text: "Accept All", href: "/maze/ascension", style: "bg-blue-500 text-white px-4 py-2 rounded" },
-      { text: "Decline", href: "/maze/trash-can", style: "text-xs text-gray-500 ml-4" }
+      { text: "Decline", href: "/maze/trash-can", style: "text-xs text-gray-500 ml-4" },
+      { text: "Eat cookie", href: "/maze/fluffy", style: "text-pink-600 ml-4 font-bold" }
     ]
   },
   "pop-up": {
@@ -295,7 +307,132 @@ export const MAZE_DATA: Record<string, MazeRoom> = {
     textColor: "text-blue-400",
     links: [
       { text: "rain", href: "/maze/ocean", style: "text-blue-600" },
-      { text: "thunder", href: "/maze/room-red", style: "text-yellow-500 ml-4" }
+      { text: "thunder", href: "/maze/room-red", style: "text-yellow-500 ml-4" },
+      { text: "look for angels", href: "/maze/armando", style: "text-pink-300 ml-4" }
+    ]
+  },
+  
+  // VIBE EXPANSION PACK
+  "can-lady": {
+    slug: "can-lady",
+    title: "ode to my can lady",
+    content: "whenever i cut myself deep enough to bleed i don't stop it <br/> i enjoy the feeling of the blood cells escaping me like prisoners <br/> their brief freedom dries up and leaves a stain on something we feel is vital to us",
+    bgColor: "bg-rose-950",
+    textColor: "text-red-500 font-serif",
+    links: [
+      { text: "stop bleeding", href: "/maze/start", style: "text-white underline" },
+      { text: "let them escape", href: "/maze/ocean", style: "text-red-300 ml-8 italic" },
+      { text: "check blood type", href: "/maze/10w-40", style: "text-gray-500 block mt-8 text-sm" }
+    ]
+  },
+  "lewisburg": {
+    slug: "lewisburg",
+    title: "magnificent millimeter",
+    content: "they tell you in 1987 i died at the Lewisburg crossing. <br/> it gets so hot lying out there under the sun. <br/> my imagination runs wild how terrible it would be, all on your own.",
+    bgColor: "bg-orange-100",
+    textColor: "text-orange-800",
+    links: [
+      { text: "wait for train", href: "/maze/void", style: "text-black font-bold" },
+      { text: "cross over", href: "/maze/ascension", style: "text-orange-400 ml-8 opacity-50" }
+    ]
+  },
+  "johnny": {
+    slug: "johnny",
+    title: "fair play",
+    content: "they said 'do it for the team, johnny'. and johnny did it. <br/> but he didnt do it for the team. <br/> johnny did it for a completely different reason.",
+    bgColor: "bg-blue-800",
+    textColor: "text-yellow-300",
+    links: [
+      { text: "ask why", href: "/maze/bureaucracy", style: "text-white underline" },
+      { text: "join the team", href: "/maze/corridor-1", style: "bg-yellow-400 text-blue-900 px-2 py-1 ml-4" }
+    ]
+  },
+  "secret-poem": {
+    slug: "secret-poem",
+    title: "staying alive",
+    content: "Today I wrote a Poem. <br/> About the secret of staying alive. <br/> The dead can't read it now. <br/> It was never meant for them.",
+    bgColor: "bg-zinc-900",
+    textColor: "text-zinc-400 font-mono",
+    links: [
+      { text: "read it", href: "/maze/detail", style: "text-white tracking-widest" },
+      { text: "bury it", href: "/maze/garden", style: "text-green-800 ml-8" }
+    ]
+  },
+  "queens-arcade": {
+    slug: "queens-arcade",
+    title: "yellow round circle",
+    content: "matthew, ted, and steven went to queens arcade to play galaga. <br/> matthew and steven ran out of quarters. <br/> ted's existence was meaningless.",
+    bgColor: "bg-indigo-900",
+    textColor: "text-yellow-400",
+    links: [
+      { text: "insert coin", href: "/maze/pop-up", style: "animate-pulse text-white border border-white px-4 py-2" },
+      { text: "play galaga", href: "/maze/dial-up", style: "text-cyan-400 ml-8" }
+    ]
+  },
+  "armando": {
+    slug: "armando",
+    title: "The Rose of P-Got County",
+    content: "'I don't know where I am,' Molly groaned. <br/> 'But this bed is soooooo comfortable.' <br/><br/> A pink mass opened up to reveal rows upon rows of pointy teeth.",
+    bgColor: "bg-pink-200",
+    textColor: "text-pink-900 font-serif",
+    links: [
+      { text: "sleep in bed", href: "/maze/void", style: "text-purple-800 italic" },
+      { text: "ask about home", href: "/maze/start", style: "text-pink-600 ml-8 underline" },
+      { text: "scream", href: "/maze/void", style: "text-red-500 ml-8 font-bold" }
+    ]
+  },
+  "fingerprints": {
+    slug: "fingerprints",
+    title: "The 3 Laws",
+    content: "robots have no fingerprints. <br/> it will be hard to identify them after they murder your family.",
+    bgColor: "bg-slate-800",
+    textColor: "text-red-500",
+    links: [
+      { text: "check hands", href: "/maze/detail", style: "text-white border-b border-red-500" },
+      { text: "run", href: "/maze/corridor-1", style: "text-red-300 ml-8 italic" }
+    ]
+  },
+  "10w-40": {
+    slug: "10w-40",
+    title: "Health and Fitness",
+    content: "if you are the only human left in the world and everyone else is a robot, good luck getting a blood transfusion. <br/> unless your blood type is 10w-40.",
+    bgColor: "bg-stone-900",
+    textColor: "text-amber-600",
+    links: [
+      { text: "check oil", href: "/maze/trash-can", style: "text-stone-500" },
+      { text: "donate blood", href: "/maze/can-lady", style: "text-red-600 ml-8" }
+    ]
+  },
+  "mars": {
+    slug: "mars",
+    title: "Eight Ball",
+    content: "fun fact: robots are on mars. <br/><br/> they are waiting.",
+    bgColor: "bg-red-900",
+    textColor: "text-red-200",
+    links: [
+      { text: "look up", href: "/maze/cloud", style: "text-white underline" },
+      { text: "go to mars", href: "/maze/void", style: "text-black bg-red-500 px-2 ml-4" }
+    ]
+  },
+  "fluffy": {
+    slug: "fluffy",
+    title: "notarobot",
+    content: "'i am fluffy, frosted, and magically delicious'",
+    bgColor: "bg-white",
+    textColor: "text-pink-500 font-bold text-2xl",
+    links: [
+      { text: "eat cereal", href: "/maze/cookie-jar", style: "text-blue-400 text-sm" },
+      { text: "verify", href: "/maze/captcha", style: "text-green-500 ml-8 text-sm" }
+    ]
+  },
+  "wayne": {
+    slug: "wayne",
+    title: "wayne's page",
+    content: "wayne's page of nothing. <br/> <br/> <br/> <br/> <br/>",
+    bgColor: "bg-white",
+    textColor: "text-gray-200",
+    links: [
+      { text: "leave", href: "/maze/start", style: "text-gray-300 text-xs" }
     ]
   }
 };
