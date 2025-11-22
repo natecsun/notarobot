@@ -118,13 +118,38 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
         const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
         const response = NextResponse.json(parsedResponse);
         response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 }); // 30 days
-        message: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-            type: error?.constructor?.name
-      });
-      return NextResponse.json(
-        { error: "Failed to process resume" },
-        { status: 500 }
-      );
+        return response;
+      }
+
+      return NextResponse.json(parsedResponse);
+
+    } catch (apiError: any) {
+      console.error("Claude API Error:", apiError);
+      console.error("Error type:", apiError.constructor?.name);
+      console.error("Error status:", apiError.status);
+      console.error("Error message:", apiError.message);
+
+      if (apiError.status === 429) {
+        sendTelegramAlert("CRITICAL: Resume API Rate Limit Hit!");
+        return NextResponse.json(
+          { error: "System is under heavy load. Please try again shortly." },
+          { status: 429 }
+        );
+      }
+
+      throw apiError; // Re-throw for general error handler
     }
+
+  } catch (error) {
+    console.error("Error processing resume:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: error?.constructor?.name
+    });
+    return NextResponse.json(
+      { error: "Failed to process resume" },
+      { status: 500 }
+    );
+  }
 }
