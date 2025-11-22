@@ -34,11 +34,15 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/90 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-         <Link href="/" className="font-mono font-bold text-xl tracking-tighter flex items-center gap-3 text-white hover:opacity-90 transition-opacity">
-            <RobotLogo className="w-8 h-8" />
-            <span className="hidden sm:inline">NOTAROBOT.COM</span>
-            <span className="sm:hidden">NAR</span>
-         </Link>
+         <div className="flex items-center gap-3">
+            <Link href="/maze/start" className="hover:animate-pulse">
+                <RobotLogo className="w-8 h-8 text-accent" />
+            </Link>
+            <Link href="/" className="font-mono font-bold text-xl tracking-tighter text-white hover:opacity-90 transition-opacity">
+                <span className="hidden sm:inline">NOTAROBOT.COM</span>
+                <span className="sm:hidden">NAR</span>
+            </Link>
+         </div>
          <div className="flex items-center gap-4">
             {user ? (
               <>
