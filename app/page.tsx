@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { FileSearch, UserX, GraduationCap, Trophy, Play, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { HowItWorks } from "@/components/HowItWorks";
 
 export default function Home() {
   return (
@@ -60,6 +61,9 @@ export default function Home() {
             </motion.div>
          </div>
       </section>
+
+      {/* How It Works Section */}
+      <HowItWorks />
 
       {/* Bento Grid Features */}
       <section className="py-24 px-6 bg-zinc-950">
