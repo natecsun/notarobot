@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { RobotLogo } from "@/components/ui/robot-logo"
 import Link from "next/link"
 import { LogOut, User, CreditCard } from "lucide-react"
+import { UpgradeButton } from "@/components/upgrade-button"
 
 export default async function ProfilePage() {
   const supabase = createClient()
