@@ -80,17 +80,37 @@ export async function POST(req: Request) {
         throw new Error("No response from AI");
       }
 
+      const parsedResponse = JSON.parse(responseContent);
+
+      // Save result to database if user is logged in
+      if (user && user.id) {
+        try {
+          await supabase
+            .from('saved_results')
+            .insert({
+              user_id: user.id,
+              service_type: 'essay',
+              original_content: text.slice(0, 100) + (text.length > 100 ? '...' : ''),
+              analyzed_content: { verdict: parsedResponse.verdict, probability: parsedResponse.ai_probability },
+              result_data: parsedResponse
+            });
+        } catch (saveError) {
+          console.error('Error saving result:', saveError);
+          // Don't fail the request if saving fails
+        }
+      }
+
       // Deduct credit OR increment visitor cookie
       if (user && user.id) {
         await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
       } else {
         const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(JSON.parse(responseContent));
+        const response = NextResponse.json(parsedResponse);
         response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 });
         return response;
       }
 
-      return NextResponse.json(JSON.parse(responseContent));
+      return NextResponse.json(parsedResponse);
 
     } catch (groqError: any) {
       if (groqError.status === 429) {

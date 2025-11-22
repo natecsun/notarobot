@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import Anthropic from "@anthropic-ai/sdk";
+import { Anthropic } from "@anthropic-ai/sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
@@ -108,6 +108,24 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
       } catch (parseError) {
         console.error("Failed to parse Claude response:", responseText);
         throw new Error("Invalid AI response format");
+      }
+
+      // Save result to database if user is logged in
+      if (user && user.id) {
+        try {
+          await supabase
+            .from('saved_results')
+            .insert({
+              user_id: user.id,
+              service_type: 'resume',
+              original_content: `Resume: ${file.name}`,
+              analyzed_content: { analysis: parsedResponse.analysis },
+              result_data: parsedResponse
+            });
+        } catch (saveError) {
+          console.error('Error saving result:', saveError);
+          // Don't fail the request if saving fails
+        }
       }
 
       // Deduct credit OR increment visitor cookie

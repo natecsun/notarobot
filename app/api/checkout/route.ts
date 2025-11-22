@@ -11,33 +11,85 @@ export async function POST(req: Request) {
   }
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "1000 AI Credits",
-              description: "Pro Tier: 1000 Credits for Resume & Profile Analysis",
-            },
-            unit_amount: 1000, // $10.00 USD
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?canceled=true`,
-      customer_email: user.email,
-      metadata: {
-        userId: user.id,
-        type: 'credits',
-        amount: 1000,
-      },
-    });
+    const { type, planId, credits } = await req.json();
 
-    return NextResponse.json({ url: session.url });
+    if (type === 'subscription') {
+      // Handle subscription checkout
+      const prices = {
+        pro: 'price_1Oxxxx', // Replace with actual Stripe price ID
+        enterprise: 'price_1Oxxxx' // Replace with actual Stripe price ID
+      };
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: prices[planId as keyof typeof prices],
+            quantity: 1,
+          },
+        ],
+        mode: "subscription",
+        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing?canceled=true`,
+        customer_email: user.email,
+        metadata: {
+          userId: user.id,
+          type: 'subscription',
+          plan: planId,
+        },
+        subscription_data: {
+          metadata: {
+            userId: user.id,
+            plan: planId,
+          },
+        },
+      });
+
+      return NextResponse.json({ url: session.url });
+    } else if (type === 'credits') {
+      // Handle credit purchase
+      const creditPackages = {
+        100: { amount: 999, credits: 100, name: "100 AI Credits" },
+        500: { amount: 3999, credits: 500, name: "500 AI Credits" },
+        1000: { amount: 6999, credits: 1000, name: "1000 AI Credits" },
+      };
+
+      const pkg = creditPackages[credits as keyof typeof creditPackages];
+      if (!pkg) {
+        return NextResponse.json({ error: "Invalid credit package" }, { status: 400 });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: pkg.name,
+                description: `One-time purchase of ${pkg.credits} credits for AI analysis`,
+              },
+              unit_amount: pkg.amount,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/profile?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing?canceled=true`,
+        customer_email: user.email,
+        metadata: {
+          userId: user.id,
+          type: 'credits',
+          credits: pkg.credits.toString(),
+          amount: (pkg.amount / 100).toString(),
+        },
+      });
+
+      return NextResponse.json({ url: session.url });
+    } else {
+      return NextResponse.json({ error: "Invalid checkout type" }, { status: 400 });
+    }
   } catch (err: any) {
     console.error("Stripe Checkout Error:", err);
     return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
