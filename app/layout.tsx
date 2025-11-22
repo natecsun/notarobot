@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { VibeLogger } from "@/components/VibeLogger";
 
 const inter = Inter({ subsets: ["latin"] });
 
