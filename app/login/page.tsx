@@ -25,6 +25,7 @@ export default function LoginPage({
           <Button 
             formAction={signInWithGoogle} 
             variant="outline" 
+            formNoValidate
             className="w-full border-zinc-800 bg-white text-black hover:bg-gray-200 font-bold mb-4 flex items-center gap-2"
           >
              <svg className="w-4 h-4" viewBox="0 0 24 24">
