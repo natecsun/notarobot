@@ -75,6 +75,7 @@ export async function POST(req: Request) {
       
     } catch (groqError: any) {
       if (groqError.status === 429) {
+        sendTelegramAlert("RATE LIMIT HIT: Profile Spotter API (429)");
         return NextResponse.json(
           { error: "Traffic is high! We hit the free tier limit. Please try again in a minute." },
           { status: 429 }

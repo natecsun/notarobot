@@ -63,6 +63,9 @@ export async function POST(req: Request) {
 
     } catch (groqError: any) {
       if (groqError.status === 429) {
+        // Fire-and-forget alert
+        sendTelegramAlert("RATE LIMIT HIT: Resume Sanitizer API (429)");
+        
         return NextResponse.json(
           { error: "Traffic is high! We hit the free tier limit. Please try again in a minute." },
           { status: 429 }
