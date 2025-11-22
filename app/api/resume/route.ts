@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
-import pdf from "pdf-parse";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { cookies } from "next/headers";
 
 const groqPaid = new Groq({
@@ -49,14 +49,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File size exceeds 5MB limit." }, { status: 400 });
     }
 
-    // 1. Extract Text from PDF
+    // 1. Extract Text from PDF using pdfjs-dist
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
     let resumeText = "";
     try {
-      const data = await pdf(buffer);
-      resumeText = data.text.trim();
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdfDocument = await loadingTask.promise;
+
+      const textParts: string[] = [];
+      for (let i = 1; i <= pdfDocument.numPages; i++) {
+        const page = await pdfDocument.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        textParts.push(pageText);
+      }
+
+      resumeText = textParts.join('\n').trim();
     } catch (e) {
       console.error("PDF Parse Error:", e);
       return NextResponse.json({ error: "Failed to parse PDF file." }, { status: 500 });
