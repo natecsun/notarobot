@@ -70,7 +70,7 @@ export async function POST(req: Request) {
             content: `Analyze this text:\n\n${text.slice(0, 15000)}`
           }
         ],
-        model: "llama3-8b-8192",
+        model: "llama-3.1-8b-instant",
         temperature: 0.1,
         response_format: { type: "json_object" }
       });
