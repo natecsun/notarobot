@@ -14,10 +14,22 @@ describe('Stripe Webhook Handler', () => {
 
   it('should handle checkout.session.completed for credits', async () => {
     // Mock Supabase admin client
+    const mockUpdateChain = {
+        eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const mockSelectChain = {
+        eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+        }),
+        single: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+    };
+
     const mockSupabase = {
       from: vi.fn().mockReturnThis(),
       insert: vi.fn().mockResolvedValue({ error: null }),
-      rpc: vi.fn().mockResolvedValue({ error: null })
+      rpc: vi.fn().mockResolvedValue({ error: null }),
+      select: vi.fn().mockReturnValue(mockSelectChain),
+      update: vi.fn().mockReturnValue(mockUpdateChain),
     };
     mockCreateAdminClient.mockReturnValue(mockSupabase as any);
 
@@ -70,11 +82,20 @@ describe('Stripe Webhook Handler', () => {
 
   it('should handle checkout.session.completed for subscriptions', async () => {
     // Mock Supabase admin client
+    const mockUpdateChain = {
+        eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const mockSelectChain = {
+        eq: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+        single: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+    };
+
     const mockSupabase = {
       from: vi.fn().mockReturnThis(),
       insert: vi.fn().mockResolvedValue({ error: null }),
-      update: vi.fn().mockResolvedValue({ error: null }),
-      rpc: vi.fn().mockResolvedValue({ error: null })
+      update: vi.fn().mockReturnValue(mockUpdateChain),
+      rpc: vi.fn().mockResolvedValue({ error: null }),
+      select: vi.fn().mockReturnValue(mockSelectChain),
     };
     mockCreateAdminClient.mockReturnValue(mockSupabase as any);
 
@@ -136,15 +157,23 @@ describe('Stripe Webhook Handler', () => {
 
   it('should handle invoice.payment_succeeded', async () => {
     // Mock Supabase admin client
+    const mockUpdateChain = {
+        eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const mockSelectChain = {
+        eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ 
+              data: { user_id: 'user-123', plan_type: 'pro' }, 
+              error: null 
+            }),
+        }),
+        single: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+    };
+
     const mockSupabase = {
       from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockResolvedValue({
-        data: {
-          user_id: 'user-123',
-          plan_type: 'pro'
-        }
-      }),
-      update: vi.fn().mockResolvedValue({ error: null }),
+      select: vi.fn().mockReturnValue(mockSelectChain),
+      update: vi.fn().mockReturnValue(mockUpdateChain),
       rpc: vi.fn().mockResolvedValue({ error: null })
     };
     mockCreateAdminClient.mockReturnValue(mockSupabase as any);
@@ -188,14 +217,20 @@ describe('Stripe Webhook Handler', () => {
 
   it('should handle customer.subscription.deleted', async () => {
     // Mock Supabase admin client
+    const mockUpdateChain = {
+        eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const mockSelectChain = {
+        eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+        }),
+        single: vi.fn().mockResolvedValue({ data: { user_id: 'user-123' }, error: null }),
+    };
+
     const mockSupabase = {
       from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockResolvedValue({
-        data: {
-          user_id: 'user-123'
-        }
-      }),
-      update: vi.fn().mockResolvedValue({ error: null })
+      select: vi.fn().mockReturnValue(mockSelectChain),
+      update: vi.fn().mockReturnValue(mockUpdateChain)
     };
     mockCreateAdminClient.mockReturnValue(mockSupabase as any);
 

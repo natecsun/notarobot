@@ -25,17 +25,13 @@ vi.mock('next/headers', () => ({
   })),
 }));
 
-const mockGroqCreate = vi.fn();
-vi.mock('groq-sdk', () => {
+const mockAnthropicCreate = vi.fn();
+vi.mock('@anthropic-ai/sdk', () => {
   return {
-    default: class {
-      constructor() {
-        this.chat = {
-          completions: {
-            create: mockGroqCreate,
-          },
-        };
-      }
+    Anthropic: class {
+      messages = {
+        create: mockAnthropicCreate,
+      };
     },
   };
 });
@@ -76,12 +72,22 @@ describe('Resume API Route - Unit Tests', () => {
       rpc: mockRpc,
     });
 
+    const mockUpdateChain = {
+      eq: mockEq,
+      single: mockSingle,
+    };
+    
+    const mockUpdate = vi.fn().mockReturnValue(mockUpdateChain);
+
     mockSelect.mockReturnValue({
       eq: mockEq,
+      single: mockSingle,
+      update: mockUpdate,
     });
 
     mockEq.mockReturnValue({
       single: mockSingle,
+      update: mockUpdate,
     });
   });
 
@@ -237,12 +243,22 @@ describe('Resume API Route - Integration Tests', () => {
       rpc: mockRpc,
     });
 
+    const mockUpdateChain = {
+      eq: mockEq,
+      single: mockSingle,
+    };
+    
+    const mockUpdate = vi.fn().mockReturnValue(mockUpdateChain);
+
     mockSelect.mockReturnValue({
       eq: mockEq,
+      single: mockSingle,
+      update: mockUpdate,
     });
 
     mockEq.mockReturnValue({
       single: mockSingle,
+      update: mockUpdate,
     });
   });
 
@@ -255,15 +271,13 @@ describe('Resume API Route - Integration Tests', () => {
       data: { credits: 10 },
       error: null
     });
-    mockPdfParse.mockResolvedValue({ text: 'Resume with leverage and synergy keywords. This text needs to be long enough to pass the minimum length check of 50 characters.' });
-    mockGroqCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            analysis: 'This resume contains robotic buzzwords.',
-            rewritten_text: 'Resume with improved and natural keywords'
-          })
-        }
+    mockAnthropicCreate.mockResolvedValue({
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          analysis: 'This resume contains robotic buzzwords.',
+          rewritten_text: 'Resume with improved and natural keywords'
+        })
       }]
     });
     mockRpc.mockResolvedValue({ data: true, error: null });
@@ -282,15 +296,14 @@ describe('Resume API Route - Integration Tests', () => {
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('analysis');
     expect(data).toHaveProperty('rewritten_text');
-    expect(mockPdfParse).toHaveBeenCalled();
-    expect(mockGroqCreate).toHaveBeenCalled();
+    expect(mockAnthropicCreate).toHaveBeenCalled();
     expect(mockRpc).toHaveBeenCalledWith('deduct_credits', {
       user_id: 'user-456',
       amount: 1
     });
   });
 
-  it('should use correct Groq model and parameters', async () => {
+  it('should use correct Anthropic model and parameters', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-789' } },
       error: null
@@ -299,15 +312,13 @@ describe('Resume API Route - Integration Tests', () => {
       data: { credits: 5 },
       error: null
     });
-    mockPdfParse.mockResolvedValue({ text: 'Test resume content that is definitely longer than fifty characters to ensure it passes the validation check for scanned PDFs.' });
-    mockGroqCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            analysis: 'Analysis',
-            rewritten_text: 'Improved'
-          })
-        }
+    mockAnthropicCreate.mockResolvedValue({
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          analysis: 'Analysis',
+          rewritten_text: 'Improved'
+        })
       }]
     });
     mockRpc.mockResolvedValue({ data: true, error: null });
@@ -322,37 +333,10 @@ describe('Resume API Route - Integration Tests', () => {
 
     await POST(request);
 
-    expect(mockGroqCreate).toHaveBeenCalled();
-    const callArgs = mockGroqCreate.mock.calls[0][0];
-    expect(callArgs.model).toBe('llama3-8b-8192');
-    expect(callArgs.temperature).toBe(0.6);
-    expect(callArgs.response_format).toEqual({ type: 'json_object' });
-  });
-
-  it('should handle PDF parsing errors', async () => {
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'user-error' } },
-      error: null
-    });
-    mockSingle.mockResolvedValue({
-      data: { credits: 5 },
-      error: null
-    });
-    mockPdfParse.mockRejectedValue(new Error('Invalid PDF format'));
-
-    const file = createMockFile('resume.pdf', 1024, 'corrupt data');
-    const mockFormData = {
-      get: vi.fn().mockReturnValue(file)
-    };
-    const request = {
-      formData: vi.fn().mockResolvedValue(mockFormData)
-    } as unknown as Request;
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(data.error).toBe('Failed to parse PDF file.');
+    expect(mockAnthropicCreate).toHaveBeenCalled();
+    const callArgs = mockAnthropicCreate.mock.calls[0][0];
+    expect(callArgs.model).toBe('claude-haiku-4-5-20251001');
+    expect(callArgs.max_tokens).toBe(4096);
   });
 
   it('should reject files larger than 5MB', async () => {
@@ -376,30 +360,7 @@ describe('Resume API Route - Integration Tests', () => {
     expect(data.error).toContain('exceeds 5MB limit');
   });
 
-  it('should reject scanned/empty PDFs', async () => {
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'user-scanned' } },
-      error: null
-    });
-    mockSingle.mockResolvedValue({ data: { credits: 5 }, error: null });
-    mockPdfParse.mockResolvedValue({ text: '   Short text   ' }); // < 50 chars
-
-    const file = createMockFile('resume.pdf', 1024, 'test pdf');
-    const mockFormData = {
-      get: vi.fn().mockReturnValue(file)
-    };
-    const request = {
-      formData: vi.fn().mockResolvedValue(mockFormData)
-    } as unknown as Request;
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(data.error).toContain('Could not extract text');
-  });
-
-  it('should handle rate limit errors from Groq', async () => {
+  it('should handle rate limit errors from Anthropic', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-rate' } },
       error: null
@@ -408,11 +369,10 @@ describe('Resume API Route - Integration Tests', () => {
       data: { credits: 5 },
       error: null
     });
-    mockPdfParse.mockResolvedValue({ text: 'Resume text that is definitely long enough to pass the validation check for this test case.' });
 
     const rateError: any = new Error('Rate limit exceeded');
     rateError.status = 429;
-    mockGroqCreate.mockRejectedValue(rateError);
+    mockAnthropicCreate.mockRejectedValue(rateError);
 
     const file = createMockFile('resume.pdf', 1024, 'test pdf');
     const mockFormData = {
@@ -430,7 +390,7 @@ describe('Resume API Route - Integration Tests', () => {
     expect(mockSendTelegramAlert).toHaveBeenCalledWith('CRITICAL: Resume API Rate Limit Hit!');
   });
 
-  it('should handle empty Groq response', async () => {
+  it('should handle empty Anthropic response', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-empty' } },
       error: null
@@ -439,13 +399,8 @@ describe('Resume API Route - Integration Tests', () => {
       data: { credits: 5 },
       error: null
     });
-    mockPdfParse.mockResolvedValue({ text: 'Resume text that is definitely long enough to pass the validation check for this test case.' });
-    mockGroqCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: null
-        }
-      }]
+    mockAnthropicCreate.mockResolvedValue({
+      content: [] // Empty content
     });
 
     const file = createMockFile('resume.pdf', 1024, 'test pdf');
