@@ -10,10 +10,18 @@ import { createClient } from "@/utils/supabase/client";
 export default function ResumePage() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [result, setResult] = useState<{ analysis: string; rewritten_text: string } | null>(null);
+  const [result, setResult] = useState<{
+    id?: string;
+    analysis: string;
+    rewritten_text: string;
+    human_score?: number;
+    ai_probability?: number;
+    verdict?: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userStatus, setUserStatus] = useState<{ type: 'visitor' | 'pro', credits?: number, visitorUsage?: number }>({ type: 'visitor' });
   const [copied, setCopied] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -85,6 +93,32 @@ export default function ResumePage() {
       navigator.clipboard.writeText(result.rewritten_text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!result?.id) return;
+
+    setShareLoading(true);
+    try {
+      const supabase = createClient();
+      // Make public
+      const { error } = await supabase
+        .from('saved_results')
+        .update({ is_public: true })
+        .eq('id', result.id);
+
+      if (error) throw error;
+
+      // Copy link
+      const url = `${window.location.origin}/verify/${result.id}`;
+      navigator.clipboard.writeText(url);
+      alert("Verification link copied to clipboard!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate share link. Please try again.");
+    } finally {
+      setShareLoading(false);
     }
   };
 
@@ -226,9 +260,48 @@ export default function ResumePage() {
                   className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden"
                 >
                   <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-500 font-bold mb-4">
-                      <CheckCircle className="w-5 h-5" /> Analysis Complete
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2 text-green-600 dark:text-green-500 font-bold">
+                        <CheckCircle className="w-5 h-5" /> Analysis Complete
+                      </div>
+                      {result.human_score && result.human_score > 85 && (
+                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full border border-blue-500/20">
+                          <CheckCircle className="w-4 h-4" /> NotARobot Verified™
+                        </div>
+                      )}
                     </div>
+
+                    {/* Score Card */}
+                    {result.human_score !== undefined && (
+                      <div className="mb-6 grid grid-cols-2 gap-4">
+                        <div className="bg-white dark:bg-black/20 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center">
+                          <div className="text-sm text-gray-500 mb-1">Human Score</div>
+                          <div className={`text-3xl font-bold ${result.human_score > 80 ? 'text-green-500' : result.human_score > 50 ? 'text-yellow-500' : 'text-red-500'}`}>
+                            {result.human_score}%
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-black/20 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center">
+                          <div className="text-sm text-gray-500 mb-1">AI Probability</div>
+                          <div className="text-3xl font-bold text-zinc-700 dark:text-zinc-300">
+                            {result.ai_probability}%
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Share Button */}
+                    {result.id && result.human_score && result.human_score > 85 && (
+                      <div className="mb-6">
+                        <Button
+                          onClick={handleShare}
+                          disabled={shareLoading}
+                          className="w-full bg-black dark:bg-white text-white dark:text-black hover:opacity-90"
+                        >
+                          {shareLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                          Share Verification Certificate
+                        </Button>
+                      </div>
+                    )}
 
                     <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl">
                       <h4 className="text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase tracking-wider mb-2">AI Detection Analysis</h4>

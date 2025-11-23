@@ -76,7 +76,8 @@ export async function POST(req: Request) {
                 type: "text",
                 text: `You are an expert executive resume writer and career coach. Please analyze this resume PDF and:
 1. Extract all the text content from the resume
-2. Rewrite it to sound natural, confident, and human, removing obvious "AI-generated" patterns
+2. Analyze it for "AI-generated" patterns (buzzwords, sentence structure, perplexity)
+3. Rewrite it to sound natural, confident, and human
 
 Guidelines for rewriting:
 - **Tone**: Professional, confident, yet authentic. Avoid being overly formal or flowery
@@ -84,8 +85,11 @@ Guidelines for rewriting:
 - **Structure**: Convert passive voice to active voice. Ensure bullet points are punchy and results-oriented
 - **Content**: Do NOT summarize. Rewrite the specific bullet points and descriptions to be more impactful. Preserve the original meaning and metrics
 
-Return ONLY a JSON object with exactly two fields (no markdown formatting):
+Return ONLY a JSON object with exactly these fields (no markdown formatting):
 {
+  "human_score": number (0-100, where 100 is perfectly human),
+  "ai_probability": number (0-100, inverse of human_score),
+  "verdict": "Human" | "AI" | "Mixed",
   "analysis": "A 1-2 sentence critique of the original resume's vibe",
   "rewritten_text": "The complete rewritten version of the resume text, formatted clearly with bullet points where appropriate"
 }`
@@ -103,7 +107,7 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
 
       // Clean response text - remove markdown code blocks if present
       let cleanedResponse = responseText.trim();
-      
+
       // Remove ```json and ``` markers if present
       if (cleanedResponse.startsWith('```json')) {
         cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -115,6 +119,14 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
       let parsedResponse;
       try {
         parsedResponse = JSON.parse(cleanedResponse);
+
+        // Validate required fields
+        if (typeof parsedResponse.human_score !== 'number' || !parsedResponse.rewritten_text) {
+          // Fallback if AI misses fields (rare but possible)
+          parsedResponse.human_score = parsedResponse.human_score || 50;
+          parsedResponse.ai_probability = parsedResponse.ai_probability || 50;
+          parsedResponse.verdict = parsedResponse.verdict || "Mixed";
+        }
       } catch (parseError) {
         console.error("Failed to parse Claude response:", cleanedResponse);
         console.error("Original response:", responseText);
@@ -122,9 +134,10 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
       }
 
       // Save result to database if user is logged in
+      let savedResultId = null;
       if (user && user.id) {
         try {
-          await supabase
+          const { data: savedData, error: saveError } = await supabase
             .from('saved_results')
             .insert({
               user_id: user.id,
@@ -132,7 +145,13 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
               original_content: `Resume: ${file.name}`,
               analyzed_content: { analysis: parsedResponse.analysis },
               result_data: parsedResponse
-            });
+            })
+            .select('id')
+            .single();
+
+          if (savedData) {
+            savedResultId = savedData.id;
+          }
         } catch (saveError) {
           console.error('Error saving result:', saveError);
           // Don't fail the request if saving fails
@@ -140,17 +159,19 @@ Return ONLY a JSON object with exactly two fields (no markdown formatting):
       }
 
       // Deduct credit OR increment visitor cookie
+      const responsePayload = { ...parsedResponse, id: savedResultId };
+
       if (user && user.id) {
         await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
       } else {
         // Increment visitor usage
         const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(parsedResponse);
+        const response = NextResponse.json(responsePayload);
         response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 }); // 30 days
         return response;
       }
 
-      return NextResponse.json(parsedResponse);
+      return NextResponse.json(responsePayload);
 
     } catch (apiError: any) {
       console.error("Claude API Error:", apiError);

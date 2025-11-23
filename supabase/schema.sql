@@ -136,3 +136,9 @@ $$ language plpgsql security definer;
 alter table profiles add column stripe_customer_id text;
 alter table profiles add column subscription_status text check (subscription_status in ('active', 'canceled', 'none'));
 alter table profiles add column plan_type text check (plan_type in ('free', 'pro', 'enterprise'));
+
+-- 9. Public Sharing of Results
+alter table saved_results add column is_public boolean default false;
+
+create policy "Public can view shared results" on saved_results
+  for select using (is_public = true);

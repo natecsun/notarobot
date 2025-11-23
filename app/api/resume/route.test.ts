@@ -76,7 +76,7 @@ describe('Resume API Route - Unit Tests', () => {
       eq: mockEq,
       single: mockSingle,
     };
-    
+
     const mockUpdate = vi.fn().mockReturnValue(mockUpdateChain);
 
     mockSelect.mockReturnValue({
@@ -247,7 +247,7 @@ describe('Resume API Route - Integration Tests', () => {
       eq: mockEq,
       single: mockSingle,
     };
-    
+
     const mockUpdate = vi.fn().mockReturnValue(mockUpdateChain);
 
     mockSelect.mockReturnValue({
@@ -275,6 +275,9 @@ describe('Resume API Route - Integration Tests', () => {
       content: [{
         type: 'text',
         text: JSON.stringify({
+          human_score: 85,
+          ai_probability: 15,
+          verdict: 'Human',
           analysis: 'This resume contains robotic buzzwords.',
           rewritten_text: 'Resume with improved and natural keywords'
         })
@@ -296,6 +299,8 @@ describe('Resume API Route - Integration Tests', () => {
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('analysis');
     expect(data).toHaveProperty('rewritten_text');
+    expect(data).toHaveProperty('human_score');
+    expect(data).toHaveProperty('verdict');
     expect(mockAnthropicCreate).toHaveBeenCalled();
     expect(mockRpc).toHaveBeenCalledWith('deduct_credits', {
       user_id: 'user-456',
@@ -316,6 +321,9 @@ describe('Resume API Route - Integration Tests', () => {
       content: [{
         type: 'text',
         text: JSON.stringify({
+          human_score: 90,
+          ai_probability: 10,
+          verdict: 'Human',
           analysis: 'Analysis',
           rewritten_text: 'Improved'
         })

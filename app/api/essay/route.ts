@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     const { text } = await req.json();
 
     if (!text || text.length < 50) {
-        return NextResponse.json({ error: "Text too short. Please enter at least 50 characters." }, { status: 400 });
+      return NextResponse.json({ error: "Text too short. Please enter at least 50 characters." }, { status: 400 });
     }
 
     // Use paid client
@@ -57,9 +57,10 @@ export async function POST(req: Request) {
             4. Overuse of transition words ("Firstly", "In conclusion", "Furthermore").
             5. Lack of personal nuance or specific, non-generic examples.
 
-            Return a JSON object with:
-            - "ai_probability": number between 0-100 (100 = definitely AI).
-            - "verdict": "Likely Human", "Mixed/Edited", or "Likely AI".
+            Return a JSON object with exactly these fields:
+            - "human_score": number (0-100, where 100 is definitely human)
+            - "ai_probability": number (0-100, inverse of human_score)
+            - "verdict": "Human" | "AI" | "Mixed"
             - "analysis": An array of strings explaining specific findings (e.g. "Consistent sentence length suggests AI", "Generic conclusion").
             - "highlight_sections": An array of strings containing specific suspicious sentences from the text (max 3).
             `
@@ -83,17 +84,24 @@ export async function POST(req: Request) {
       const parsedResponse = JSON.parse(responseContent);
 
       // Save result to database if user is logged in
+      let savedResultId = null;
       if (user && user.id) {
         try {
-          await supabase
+          const { data: savedData, error: saveError } = await supabase
             .from('saved_results')
             .insert({
               user_id: user.id,
               service_type: 'essay',
               original_content: text.slice(0, 100) + (text.length > 100 ? '...' : ''),
-              analyzed_content: { verdict: parsedResponse.verdict, probability: parsedResponse.ai_probability },
+              analyzed_content: { analysis: parsedResponse.analysis },
               result_data: parsedResponse
-            });
+            })
+            .select('id')
+            .single();
+
+          if (savedData) {
+            savedResultId = savedData.id;
+          }
         } catch (saveError) {
           console.error('Error saving result:', saveError);
           // Don't fail the request if saving fails
@@ -101,16 +109,18 @@ export async function POST(req: Request) {
       }
 
       // Deduct credit OR increment visitor cookie
+      const responsePayload = { ...parsedResponse, id: savedResultId };
+
       if (user && user.id) {
         await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
       } else {
         const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(parsedResponse);
+        const response = NextResponse.json(responsePayload);
         response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 });
         return response;
       }
 
-      return NextResponse.json(parsedResponse);
+      return NextResponse.json(responsePayload);
 
     } catch (groqError: any) {
       if (groqError.status === 429) {

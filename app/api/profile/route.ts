@@ -73,10 +73,11 @@ export async function POST(req: Request) {
                 1. Visual Anomalies: Asymmetrical eyes/ears, weird hands, background warping, overly smooth skin texture, mismatched earrings.
                 2. Text/Bio Anomalies: Generic "AI" phrasing, inconsistent details, robotic tone.
 
-                Return a JSON object with:
-                - "fake_probability": number between 0-100
-                - "verdict": "Likely Real" or "Likely Fake" or "Suspicious"
-                - "analysis": A bulleted list of specific red flags or green flags found.
+                Return a JSON object with exactly these fields:
+                - "human_score": number (0-100, where 100 is definitely real/human)
+                - "ai_probability": number (0-100, inverse of human_score)
+                - "verdict": "Real" | "Fake" | "Suspicious"
+                - "analysis": "A bulleted list of specific red flags or green flags found."
                 
                 Be critical but fair.
                 `
@@ -104,17 +105,24 @@ export async function POST(req: Request) {
       const parsedResponse = JSON.parse(responseContent);
 
       // Save result to database if user is logged in
+      let savedResultId = null;
       if (user && user.id) {
         try {
-          await supabase
+          const { data: savedData, error: saveError } = await supabase
             .from('saved_results')
             .insert({
               user_id: user.id,
               service_type: 'profile',
               original_content: `Profile: ${file.name}`,
-              analyzed_content: { verdict: parsedResponse.verdict, probability: parsedResponse.fake_probability },
+              analyzed_content: { analysis: parsedResponse.analysis },
               result_data: parsedResponse
-            });
+            })
+            .select('id')
+            .single();
+
+          if (savedData) {
+            savedResultId = savedData.id;
+          }
         } catch (saveError) {
           console.error('Error saving result:', saveError);
           // Don't fail the request if saving fails
@@ -122,16 +130,18 @@ export async function POST(req: Request) {
       }
 
       // Deduct credit OR increment visitor cookie
+      const responsePayload = { ...parsedResponse, id: savedResultId };
+
       if (user && user.id) {
         await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
       } else {
         const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(parsedResponse);
+        const response = NextResponse.json(responsePayload);
         response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 });
         return response;
       }
 
-      return NextResponse.json(parsedResponse);
+      return NextResponse.json(responsePayload);
 
     } catch (groqError: any) {
       if (groqError.status === 429) {
