@@ -132,9 +132,9 @@ export default function ResumePage() {
             </Button>
           </Link>
 
-          <div className="flex items-center gap-3 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 px-4 py-2 rounded-full shadow-sm">
+          <div className="flex items-center gap-3 bg-zinc-900/70 backdrop-blur-sm border border-zinc-800 px-4 py-2 rounded-full shadow-sm">
             <div className={`w-2 h-2 rounded-full ${userStatus.type === 'pro' ? 'bg-green-500' : 'bg-blue-500'}`} />
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-gray-100">
               {userStatus.type === 'pro'
                 ? `Pro Member (${userStatus.credits} Credits)`
                 : `Visitor Mode (${Math.max(0, 2 - (userStatus.visitorUsage || 0))} uses left)`}
@@ -175,6 +175,8 @@ export default function ResumePage() {
                 accept="application/pdf"
                 onChange={handleFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                aria-label="Upload resume PDF"
+                title="Upload resume PDF"
               />
 
               <AnimatePresence mode="wait">
@@ -333,12 +335,12 @@ export default function ResumePage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 p-12 text-center"
+                  className="h-full flex flex-col items-center justify-center text-gray-300 border-2 border-dashed border-zinc-800 rounded-2xl bg-zinc-900/70 p-12 text-center"
                 >
-                  <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
-                    <FileText className="w-8 h-8 opacity-20" />
+                  <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+                    <FileText className="w-8 h-8 opacity-40" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Waiting for Resume</h3>
+                  <h3 className="text-lg font-medium text-gray-100 mb-2">Waiting for Resume</h3>
                   <p className="text-sm max-w-xs mx-auto">Upload your resume on the left to see the AI analysis and humanized version here.</p>
                 </motion.div>
               )}

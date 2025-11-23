@@ -52,7 +52,7 @@ export default function LeaderboardPage() {
     if (rank === 1) return <Trophy className="text-yellow-500 w-6 h-6" />
     if (rank === 2) return <Medal className="text-gray-400 w-6 h-6" />
     if (rank === 3) return <Medal className="text-amber-700 w-6 h-6" />
-    return <span className="font-mono font-bold text-gray-500">#{rank}</span>
+    return <span className="font-mono font-bold text-gray-300">#{rank}</span>
   }
 
   const getRankBackground = (rank: number) => {
@@ -94,44 +94,44 @@ export default function LeaderboardPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 text-center"
+            className="bg-zinc-900/60 backdrop-blur-xl rounded-xl border border-zinc-800 p-6 text-center"
           >
             <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
             <div className="text-2xl font-bold">{leaderboardData.length}</div>
-            <div className="text-sm text-gray-500">Verified Humans</div>
+            <div className="text-sm text-gray-300">Verified Humans</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 text-center"
+            className="bg-zinc-900/60 backdrop-blur-xl rounded-xl border border-zinc-800 p-6 text-center"
           >
             <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
             <div className="text-2xl font-bold">
               {leaderboardData[0]?.score.toLocaleString() || 0}
             </div>
-            <div className="text-sm text-gray-500">Top Score</div>
+            <div className="text-sm text-gray-300">Top Score</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 text-center"
+            className="bg-zinc-900/60 backdrop-blur-xl rounded-xl border border-zinc-800 p-6 text-center"
           >
             <Zap className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
             <div className="text-2xl font-bold">
               {Math.max(...leaderboardData.map(d => d.streak), 0)}x
             </div>
-            <div className="text-sm text-gray-500">Best Streak</div>
+            <div className="text-sm text-gray-300">Best Streak</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 text-center"
+            className="bg-zinc-900/60 backdrop-blur-xl rounded-xl border border-zinc-800 p-6 text-center"
           >
             <TrendingUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
             <div className="text-2xl font-bold">
@@ -139,7 +139,7 @@ export default function LeaderboardPage() {
                 ? Math.round(leaderboardData.reduce((acc, d) => acc + d.accuracy, 0) / leaderboardData.length)
                 : 0}%
             </div>
-            <div className="text-sm text-gray-500">Avg Accuracy</div>
+            <div className="text-sm text-gray-300">Avg Accuracy</div>
           </motion.div>
         </div>
 
@@ -159,8 +159,8 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Leaderboard Table */}
-        <div className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-xl">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-zinc-200 dark:border-zinc-800 font-bold text-sm text-gray-500 uppercase tracking-wider">
+        <div className="bg-zinc-900/60 backdrop-blur-xl rounded-xl border border-zinc-800 overflow-hidden shadow-xl">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-zinc-800 font-bold text-sm text-gray-200 uppercase tracking-wider">
             <div className="col-span-2 text-center">Rank</div>
             <div className="col-span-4">User</div>
             <div className="col-span-2 text-right">Score</div>
@@ -170,7 +170,7 @@ export default function LeaderboardPage() {
           
           <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {leaderboardData?.length === 0 ? (
-               <div className="p-8 text-center text-gray-500">
+               <div className="p-8 text-center text-gray-300">
                   <Trophy className="w-12 h-12 mx-auto mb-4 opacity-20" />
                   <p className="mb-2">No scores yet</p>
                   <p className="text-sm">Be the first to verify your humanity!</p>
@@ -188,11 +188,11 @@ export default function LeaderboardPage() {
                      {getRankIcon(index + 1)}
                    </div>
                    <div className="col-span-4">
-                     <div className="font-medium text-lg">{user.username}</div>
-                     <div className="text-xs text-gray-500">
-                       {new Date(user.created_at).toLocaleDateString()}
-                     </div>
-                   </div>
+                    <div className="font-medium text-lg">{user.username}</div>
+                    <div className="text-xs text-gray-200">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
                    <div className="col-span-2 text-right">
                      <div className="font-mono font-bold">{user.score.toLocaleString()}</div>
                    </div>
@@ -210,7 +210,7 @@ export default function LeaderboardPage() {
         
         <div className="mt-8 text-center">
             <div className="mb-4">
-              <p className="text-gray-500 mb-2">Think you can beat them?</p>
+              <p className="text-gray-300 mb-2">Think you can beat them?</p>
               <p className="text-sm text-gray-400">Test your AI detection skills and climb the leaderboard</p>
             </div>
             <Link href="/game">
