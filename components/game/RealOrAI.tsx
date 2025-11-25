@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { CheckCircle, XCircle, RefreshCw, Trophy } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { ShareScore } from "@/components/ShareScore";
 
 type GameItem = {
   id: string;
@@ -207,20 +208,32 @@ export function RealOrAI() {
   };
 
   if (gameState === 'finished') {
+    const accuracy = Math.round((correctCount / MOCK_DATA.length) * 100);
+    
     return (
       <div className="text-center p-8 bg-zinc-900 rounded-xl border border-zinc-800">
+        <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
         <h2 className="text-3xl font-bold mb-4">Game Over!</h2>
-        <p className="text-xl mb-2">Final Score: <span className="text-accent font-mono">{score}</span></p>
+        <p className="text-4xl font-bold text-accent font-mono mb-2">{score}</p>
         <p className="text-gray-400 mb-6">
-          Accuracy: {Math.round((correctCount / MOCK_DATA.length) * 100)}% | 
-          Best Streak: {maxStreak}
+          {accuracy}% accuracy • {maxStreak}x best streak
         </p>
+        
+        {accuracy >= 80 && (
+          <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm">
+            <CheckCircle className="w-4 h-4" />
+            Verified Human — You can spot the bots!
+          </div>
+        )}
         
         {isSaving && <p className="text-sm text-gray-500 mb-4">Saving to leaderboard...</p>}
         
-        <Button onClick={resetGame} className="gap-2">
-          <RefreshCw className="w-4 h-4" /> Play Again
-        </Button>
+        <div className="flex gap-4 justify-center flex-wrap">
+          <ShareScore score={score} accuracy={accuracy} streak={maxStreak} />
+          <Button onClick={resetGame} variant="outline" className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Play Again
+          </Button>
+        </div>
       </div>
     );
   }

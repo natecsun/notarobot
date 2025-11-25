@@ -5,65 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Tag } from "lucide-react";
 
-// Blog posts data - in production, this would come from a CMS or MDX files
-const BLOG_POSTS = [
-  {
-    slug: "how-to-spot-ai-generated-resume",
-    title: "How to Spot an AI-Generated Resume in 2024",
-    excerpt: "Recruiters are getting smarter. Your ChatGPT-polished resume might be getting auto-rejected. Here's what they're looking for.",
-    author: "The Team",
-    date: "2024-12-01",
-    readTime: "5 min",
-    category: "Guides",
-    featured: true,
-  },
-  {
-    slug: "dead-internet-theory-explained",
-    title: "Dead Internet Theory: Is Everyone Online Actually a Bot?",
-    excerpt: "The conspiracy theory that won't die. We investigate how much of the internet is actually automated, and why it matters.",
-    author: "The Team",
-    date: "2024-11-28",
-    readTime: "8 min",
-    category: "Deep Dives",
-    featured: true,
-  },
-  {
-    slug: "dating-app-bots-detection",
-    title: "Your Tinder Match Might Be a Bot: A Detection Guide",
-    excerpt: "GAN-generated faces, scripted conversations, and suspiciously perfect profiles. Learn to protect your heart (and data).",
-    author: "The Team",
-    date: "2024-11-20",
-    readTime: "6 min",
-    category: "Guides",
-  },
-  {
-    slug: "ats-systems-explained",
-    title: "ATS Systems: Why Your Resume Gets Rejected Before Humans See It",
-    excerpt: "The robots gatekeeping your job applications. Understanding how ATS works and how to optimize for both machines and humans.",
-    author: "The Team",
-    date: "2024-11-15",
-    readTime: "7 min",
-    category: "Career",
-  },
-  {
-    slug: "ai-detection-tools-comparison",
-    title: "AI Detection Tools Compared: Which Actually Work?",
-    excerpt: "We tested GPTZero, Originality.ai, and others against real AI content. The results might surprise you.",
-    author: "The Team",
-    date: "2024-11-10",
-    readTime: "10 min",
-    category: "Reviews",
-  },
-  {
-    slug: "future-of-human-verification",
-    title: "The Future of Proving You're Human",
-    excerpt: "CAPTCHAs are dying. Biometrics are creepy. What comes next in the battle between humans and machines?",
-    author: "The Team",
-    date: "2024-11-05",
-    readTime: "6 min",
-    category: "Future",
-  },
-];
+import { BLOG_POSTS } from "@/lib/blog-data";
 
 export default function BlogPage() {
   const featuredPosts = BLOG_POSTS.filter(p => p.featured);
