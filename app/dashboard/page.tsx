@@ -10,26 +10,45 @@ import {
     Calendar,
     CheckCircle,
     AlertTriangle,
-    XCircle
+    XCircle,
+    TrendingUp,
+    Shield,
+    Zap,
+    Activity
 } from "lucide-react";
 
 export default async function DashboardPage() {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         redirect("/login");
     }
 
+    // Fetch results
     const { data: results, error } = await supabase
         .from('saved_results')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+    // Fetch profile for credits
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('credits, username')
+        .eq('id', user.id)
+        .single();
+
     if (error) {
         console.error("Error fetching results:", error);
     }
+
+    // Calculate stats
+    const totalScans = results?.length || 0;
+    const avgScore = results?.length 
+        ? Math.round(results.reduce((acc, r) => acc + (r.result_data?.human_score || 0), 0) / results.length)
+        : 0;
+    const verifiedCount = results?.filter(r => (r.result_data?.human_score || 0) > 85).length || 0;
 
     const getIcon = (type: string) => {
         switch (type) {
@@ -61,12 +80,44 @@ export default async function DashboardPage() {
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-                        <p className="text-gray-400">Welcome back, {user.email}</p>
+                        <h1 className="text-3xl font-bold mb-2">Command Center</h1>
+                        <p className="text-gray-400">Welcome back, {profile?.username || user.email?.split('@')[0]}</p>
                     </div>
                     <Link href="/">
                         <Button variant="outline">New Analysis</Button>
                     </Link>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+                            <Zap className="w-4 h-4 text-accent" />
+                            Credits
+                        </div>
+                        <div className="text-2xl font-bold text-accent">{profile?.credits || 0}</div>
+                    </div>
+                    <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+                            <Activity className="w-4 h-4 text-blue-400" />
+                            Total Scans
+                        </div>
+                        <div className="text-2xl font-bold">{totalScans}</div>
+                    </div>
+                    <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+                            <TrendingUp className="w-4 h-4 text-green-400" />
+                            Avg Score
+                        </div>
+                        <div className="text-2xl font-bold text-green-400">{avgScore}%</div>
+                    </div>
+                    <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+                            <Shield className="w-4 h-4 text-purple-400" />
+                            Verified
+                        </div>
+                        <div className="text-2xl font-bold text-purple-400">{verifiedCount}</div>
+                    </div>
                 </div>
 
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">

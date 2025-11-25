@@ -5,6 +5,8 @@ import { FileSearch, UserX, GraduationCap, Trophy, Play, ArrowRight, Zap, Skull,
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { HowItWorks } from "@/components/HowItWorks";
+import { Testimonials } from "@/components/Testimonials";
+import { EmailCapture } from "@/components/EmailCapture";
 import { useState, useEffect } from "react";
 
 const ROTATING_TAGLINES = [
@@ -211,6 +213,14 @@ export default function Home() {
             </div>
          </div>
       </section>
+
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* Email Capture / Waitlist */}
+      <div id="waitlist">
+        <EmailCapture />
+      </div>
     </main>
   );
 }

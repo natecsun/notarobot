@@ -44,11 +44,24 @@ export function Navbar() {
             </Link>
          </div>
          <div className="flex items-center gap-4">
+            {/* Nav Links - visible on larger screens */}
+            <div className="hidden md:flex items-center gap-1">
+              <Link href="/about" className="px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">
+                About
+              </Link>
+              <Link href="/blog" className="px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">
+                Blog
+              </Link>
+              <Link href="/pricing" className="px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">
+                Pricing
+              </Link>
+            </div>
+
             {user ? (
               <>
-                <Link href="/profile">
+                <Link href="/dashboard">
                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                      <UserIcon className="w-4 h-4 mr-2" /> Profile
+                      <UserIcon className="w-4 h-4 mr-2" /> Dashboard
                    </Button>
                 </Link>
                 <Button 
