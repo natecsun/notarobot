@@ -52,8 +52,8 @@ describe('Navbar', () => {
     // Should show Start Verifying button
     expect(screen.getByText('Start Verifying')).toBeInTheDocument()
 
-    // Should NOT show Profile or Sign Out
-    expect(screen.queryByText('Profile')).not.toBeInTheDocument()
+    // Should NOT show Dashboard or Sign Out
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
     expect(screen.queryByText('Sign Out')).not.toBeInTheDocument()
   })
 
@@ -67,7 +67,7 @@ describe('Navbar', () => {
 
     // Wait for user state to update
     await waitFor(() => {
-      expect(screen.getByText('Profile')).toBeInTheDocument()
+      expect(screen.getByText('Dashboard')).toBeInTheDocument()
     })
 
     // Should show Sign Out
