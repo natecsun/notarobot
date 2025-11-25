@@ -16,15 +16,22 @@ export async function POST(req: Request) {
     if (type === 'subscription') {
       // Handle subscription checkout
       const prices = {
-        pro: 'price_1Oxxxx', // Replace with actual Stripe price ID
-        enterprise: 'price_1Oxxxx' // Replace with actual Stripe price ID
+        pro: process.env.STRIPE_PRICE_ID_PRO,
+        enterprise: process.env.STRIPE_PRICE_ID_ENTERPRISE
       };
+
+      const priceId = prices[planId as keyof typeof prices];
+
+      if (!priceId) {
+        console.error(`Missing Price ID for plan: ${planId}`);
+        return NextResponse.json({ error: "Price ID not configured" }, { status: 500 });
+      }
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
           {
-            price: prices[planId as keyof typeof prices],
+            price: priceId,
             quantity: 1,
           },
         ],
