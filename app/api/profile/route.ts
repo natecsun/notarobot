@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
+import { checkUserCreditsOrVisitorLimit, deductCreditsOrTrackVisitor } from "@/lib/credits";
+import { PROFILE_FILE_LIMIT } from "@/lib/config";
 
 const groqPaid = new Groq({
   apiKey: process.env.GROQ_API_KEY_PAID || process.env.GROQ_API_KEY,
 });
-
-import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -15,23 +16,10 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     const cookieStore = cookies();
 
-    // Visitor Logic (No User)
-    if (!user) {
-      const usageCount = parseInt(cookieStore.get("visitor_usage")?.value || "0");
-      if (usageCount >= 2) {
-        return NextResponse.json({ error: "Visitor limit reached. Please sign up for 50 free credits." }, { status: 403 });
-      }
-    } else {
-      // User Logic (Check Credits)
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile || (profile.credits || 0) < 1) {
-        return NextResponse.json({ error: "Insufficient credits. Please buy more." }, { status: 403 });
-      }
+    // Check Credits or Visitor Limit
+    const creditCheck = await checkUserCreditsOrVisitorLimit(supabase, user, cookieStore);
+    if (!creditCheck.allowed) {
+      return NextResponse.json({ error: creditCheck.error }, { status: creditCheck.status || 403 });
     }
 
     const formData = await req.formData();
@@ -44,10 +32,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Check file size (4MB limit)
-    if (file.size > 4 * 1024 * 1024) {
+    // Check file size
+    if (file.size > PROFILE_FILE_LIMIT) {
       return NextResponse.json(
-        { error: "File too large. Please upload an image under 4MB." },
+        { error: `File too large. Please upload an image under ${PROFILE_FILE_LIMIT / 1024 / 1024}MB.` },
         { status: 400 }
       );
     }
@@ -129,19 +117,13 @@ export async function POST(req: Request) {
         }
       }
 
-      // Deduct credit OR increment visitor cookie
       const responsePayload = { ...parsedResponse, id: savedResultId };
+      const response = NextResponse.json(responsePayload);
 
-      if (user && user.id) {
-        await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
-      } else {
-        const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(responsePayload);
-        response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 });
-        return response;
-      }
+      // Deduct credit OR increment visitor cookie
+      await deductCreditsOrTrackVisitor(supabase, user, cookieStore, response);
 
-      return NextResponse.json(responsePayload);
+      return response;
 
     } catch (groqError: any) {
       if (groqError.status === 429) {

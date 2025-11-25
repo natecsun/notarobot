@@ -4,10 +4,8 @@ import { Anthropic } from "@anthropic-ai/sdk";
 import { sendTelegramAlert } from "@/lib/telegram";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-
-const groqPaid = new Groq({
-  apiKey: process.env.GROQ_API_KEY_PAID || process.env.GROQ_API_KEY,
-});
+import { checkUserCreditsOrVisitorLimit, deductCreditsOrTrackVisitor } from "@/lib/credits";
+import { RESUME_FILE_LIMIT } from "@/lib/config";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -19,23 +17,10 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     const cookieStore = cookies();
 
-    // Visitor Logic (No User)
-    if (!user) {
-      const usageCount = parseInt(cookieStore.get("visitor_usage")?.value || "0");
-      if (usageCount >= 2) {
-        return NextResponse.json({ error: "Visitor limit reached. Please sign up for 50 free credits." }, { status: 403 });
-      }
-    } else {
-      // User Logic (Check Credits)
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile || (profile.credits || 0) < 1) {
-        return NextResponse.json({ error: "Insufficient credits. Please buy more." }, { status: 403 });
-      }
+    // Check Credits or Visitor Limit
+    const creditCheck = await checkUserCreditsOrVisitorLimit(supabase, user, cookieStore);
+    if (!creditCheck.allowed) {
+      return NextResponse.json({ error: creditCheck.error }, { status: creditCheck.status || 403 });
     }
 
     const formData = await req.formData();
@@ -45,9 +30,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Validate file size (Max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size exceeds 5MB limit." }, { status: 400 });
+    // Validate file size
+    if (file.size > RESUME_FILE_LIMIT) {
+      return NextResponse.json({ error: `File size exceeds ${RESUME_FILE_LIMIT / 1024 / 1024}MB limit.` }, { status: 400 });
     }
 
     // Convert PDF to base64 for Claude
@@ -131,7 +116,7 @@ Return ONLY a valid JSON object with exactly these fields (no markdown formattin
         }
       } catch (parseError) {
         console.error("Failed to parse Claude response:", cleanedResponse.substring(0, 500));
-        
+
         // Try to recover partial JSON for truncated responses
         try {
           // Check if response was truncated (common with long resumes)
@@ -141,7 +126,7 @@ Return ONLY a valid JSON object with exactly these fields (no markdown formattin
             const aiProbMatch = cleanedResponse.match(/"ai_probability"\s*:\s*(\d+)/);
             const verdictMatch = cleanedResponse.match(/"verdict"\s*:\s*"(Human|AI|Mixed)"/);
             const analysisMatch = cleanedResponse.match(/"analysis"\s*:\s*"([^"]+)"/);
-            
+
             if (humanScoreMatch) {
               parsedResponse = {
                 human_score: parseInt(humanScoreMatch[1]),
@@ -188,20 +173,13 @@ Return ONLY a valid JSON object with exactly these fields (no markdown formattin
         }
       }
 
-      // Deduct credit OR increment visitor cookie
       const responsePayload = { ...parsedResponse, id: savedResultId };
+      const response = NextResponse.json(responsePayload);
 
-      if (user && user.id) {
-        await supabase.rpc('deduct_credits', { user_id: user.id, amount: 1 });
-      } else {
-        // Increment visitor usage
-        const currentUsage = parseInt(cookies().get("visitor_usage")?.value || "0");
-        const response = NextResponse.json(responsePayload);
-        response.cookies.set("visitor_usage", (currentUsage + 1).toString(), { maxAge: 60 * 60 * 24 * 30 }); // 30 days
-        return response;
-      }
+      // Deduct credit OR increment visitor cookie
+      await deductCreditsOrTrackVisitor(supabase, user, cookieStore, response);
 
-      return NextResponse.json(responsePayload);
+      return response;
 
     } catch (apiError: any) {
       console.error("Claude API Error:", apiError);
