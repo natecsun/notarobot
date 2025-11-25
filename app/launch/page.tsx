@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 
 // Product Hunt launch date - set this to your actual launch date
-const LAUNCH_DATE = new Date("2025-01-15T08:00:00-08:00"); // 8 AM PST
+const LAUNCH_DATE = new Date("2026-01-01T08:00:00-08:00"); // 8 AM PST
 
 export default function LaunchPage() {
   const [email, setEmail] = useState("");
