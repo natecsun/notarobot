@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       // Use Claude to extract and rewrite resume text from PDF
       const message = await anthropic.messages.create({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [
           {
             role: "user",
@@ -75,9 +75,11 @@ export async function POST(req: Request) {
               {
                 type: "text",
                 text: `You are an expert executive resume writer and career coach. Please analyze this resume PDF and:
-1. Extract all the text content from the resume
+1. Extract the text content from the resume (if it's a sample/template document, just analyze the first/main resume)
 2. Analyze it for "AI-generated" patterns (buzzwords, sentence structure, perplexity)
 3. Rewrite it to sound natural, confident, and human
+
+IMPORTANT: If the document contains multiple sample resumes or is very long, only analyze and rewrite the FIRST resume. Keep your response under 6000 characters.
 
 Guidelines for rewriting:
 - **Tone**: Professional, confident, yet authentic. Avoid being overly formal or flowery
@@ -85,7 +87,7 @@ Guidelines for rewriting:
 - **Structure**: Convert passive voice to active voice. Ensure bullet points are punchy and results-oriented
 - **Content**: Do NOT summarize. Rewrite the specific bullet points and descriptions to be more impactful. Preserve the original meaning and metrics
 
-Return ONLY a JSON object with exactly these fields (no markdown formatting):
+Return ONLY a valid JSON object with exactly these fields (no markdown formatting, no code blocks):
 {
   "human_score": number (0-100, where 100 is perfectly human),
   "ai_probability": number (0-100, inverse of human_score),
@@ -128,9 +130,37 @@ Return ONLY a JSON object with exactly these fields (no markdown formatting):
           parsedResponse.verdict = parsedResponse.verdict || "Mixed";
         }
       } catch (parseError) {
-        console.error("Failed to parse Claude response:", cleanedResponse);
-        console.error("Original response:", responseText);
-        throw new Error("Invalid AI response format");
+        console.error("Failed to parse Claude response:", cleanedResponse.substring(0, 500));
+        
+        // Try to recover partial JSON for truncated responses
+        try {
+          // Check if response was truncated (common with long resumes)
+          if (message.stop_reason === 'max_tokens' || cleanedResponse.includes('"rewritten_text"')) {
+            // Extract what we can from the partial response
+            const humanScoreMatch = cleanedResponse.match(/"human_score"\s*:\s*(\d+)/);
+            const aiProbMatch = cleanedResponse.match(/"ai_probability"\s*:\s*(\d+)/);
+            const verdictMatch = cleanedResponse.match(/"verdict"\s*:\s*"(Human|AI|Mixed)"/);
+            const analysisMatch = cleanedResponse.match(/"analysis"\s*:\s*"([^"]+)"/);
+            
+            if (humanScoreMatch) {
+              parsedResponse = {
+                human_score: parseInt(humanScoreMatch[1]),
+                ai_probability: aiProbMatch ? parseInt(aiProbMatch[1]) : 100 - parseInt(humanScoreMatch[1]),
+                verdict: verdictMatch ? verdictMatch[1] : "Mixed",
+                analysis: analysisMatch ? analysisMatch[1] : "Analysis completed but response was truncated due to document length.",
+                rewritten_text: "The rewritten resume was too long to display completely. Please try with a shorter document or a single-page resume for full results."
+              };
+              console.log("Recovered partial response:", parsedResponse);
+            } else {
+              throw new Error("Could not recover partial response");
+            }
+          } else {
+            throw new Error("Invalid JSON and not recoverable");
+          }
+        } catch (recoveryError) {
+          console.error("Recovery failed:", recoveryError);
+          throw new Error("Invalid AI response format. The document may be too long - please try with a single resume.");
+        }
       }
 
       // Save result to database if user is logged in
