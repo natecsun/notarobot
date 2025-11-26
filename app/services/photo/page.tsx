@@ -20,7 +20,7 @@ export default function PhotoSecurityPage() {
     safety_score: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [userStatus, setUserStatus] = useState<{ type: 'visitor' | 'pro', credits?: number, hasPhotoPurchase?: boolean }>({ type: 'visitor' });
+  const [userStatus, setUserStatus] = useState<{ type: 'visitor' | 'pro', credits?: number, hasPhotoPurchase?: boolean, isLoggedIn?: boolean }>({ type: 'visitor', isLoggedIn: false });
   const [showPayment, setShowPayment] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,10 +41,11 @@ export default function PhotoSecurityPage() {
         setUserStatus({ 
           type: isPro ? 'pro' : 'visitor', 
           credits: profile?.credits || 0,
-          hasPhotoPurchase: isPro
+          hasPhotoPurchase: isPro,
+          isLoggedIn: true
         });
       } else {
-        setUserStatus({ type: 'visitor' });
+        setUserStatus({ type: 'visitor', isLoggedIn: false });
       }
     };
     checkStatus();
@@ -123,6 +124,14 @@ export default function PhotoSecurityPage() {
   };
 
   const handleOneTimePurchase = async () => {
+    // If not logged in, redirect to login first
+    if (!userStatus.isLoggedIn) {
+      // Store return URL in sessionStorage so we can come back
+      sessionStorage.setItem('photoSecurityReturn', window.location.href);
+      window.location.href = '/login?redirect=/services/photo';
+      return;
+    }
+
     setPaymentLoading(true);
     try {
       const response = await fetch('/api/checkout', {
@@ -137,6 +146,9 @@ export default function PhotoSecurityPage() {
       const data = await response.json();
       if (response.ok) {
         window.location.href = data.url;
+      } else if (response.status === 401) {
+        // Session expired, redirect to login
+        window.location.href = '/login?redirect=/services/photo';
       } else {
         setError(data.error || 'Unable to process payment');
       }
@@ -553,7 +565,7 @@ export default function PhotoSecurityPage() {
                       ) : (
                         <CreditCard className="w-4 h-4 mr-2" />
                       )}
-                      Pay $3.99
+                      {userStatus.isLoggedIn ? 'Pay $3.99' : 'Sign In to Pay $3.99'}
                     </Button>
                   </div>
 
