@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowLeft, Check, Star, Zap, Crown, Loader2 } from "lucide-react"
+import { ArrowLeft, Check, Star, Zap, Crown, Loader2, EyeOff, Shield } from "lucide-react"
 import { motion } from "framer-motion"
 import { createClient } from "@/utils/supabase/client"
 
@@ -200,6 +200,10 @@ export default function PricingPage() {
                 <Check className="w-4 h-4 text-green-500" />
                 <span>Priority processing</span>
               </li>
+              <li className="flex items-center gap-3 text-sm">
+                <Check className="w-4 h-4 text-green-500" />
+                <span className="text-red-400">Anti AI Spy photo security</span>
+              </li>
             </ul>
             <Button 
               className="w-full bg-accent text-black hover:bg-accent/90" 
@@ -361,6 +365,68 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Photo Security - One-Time Purchase */}
+        <div className="mb-20">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+              <EyeOff className="text-red-400" /> Anti AI Spy Photo Security
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">AI can geo-locate you from tiny clues in your photos. Protect your privacy with one-time purchases or get unlimited access with Pro.</p>
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="max-w-lg mx-auto border border-red-500/30 bg-gradient-to-r from-zinc-900 to-red-950/20 rounded-2xl p-8"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Single Photo</h3>
+                  <p className="text-sm text-gray-400">One-time purchase</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">$3.99</div>
+                <div className="text-xs text-gray-500">per photo</div>
+              </div>
+            </div>
+            
+            <ul className="space-y-2 mb-6">
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>AI location marker detection</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Automatic threat neutralization</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Metadata stripping</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Detailed security report</span>
+              </li>
+            </ul>
+            
+            <Link href="/services/photo">
+              <Button className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500">
+                <EyeOff className="w-4 h-4 mr-2" /> Secure a Photo Now
+              </Button>
+            </Link>
+            
+            <p className="text-center text-xs text-gray-500 mt-4">
+              Or get unlimited photo security with Pro subscription
+            </p>
+          </motion.div>
+        </div>
+
         {/* FAQ Section */}
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-12">Frequently Asked Questions</h2>
@@ -380,6 +446,14 @@ export default function PricingPage() {
             <div>
               <h3 className="font-bold mb-2">What payment methods do you accept?</h3>
               <p className="text-gray-400 text-sm">We accept all major credit cards, debit cards, and PayPal through Stripe.</p>
+            </div>
+            <div>
+              <h3 className="font-bold mb-2">What is Anti AI Spy photo security?</h3>
+              <p className="text-gray-400 text-sm">AI can now identify your location from tiny clues in photos. We analyze and neutralize these markers to protect your privacy.</p>
+            </div>
+            <div>
+              <h3 className="font-bold mb-2">How does photo security pricing work?</h3>
+              <p className="text-gray-400 text-sm">Pay $3.99 per photo, or get unlimited photo security included with your Pro subscription.</p>
             </div>
           </div>
         </div>

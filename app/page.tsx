@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { FileSearch, UserX, GraduationCap, Trophy, Play, ArrowRight, Zap, Skull, AlertTriangle } from "lucide-react";
+import { FileSearch, UserX, GraduationCap, Trophy, Play, ArrowRight, Zap, Skull, AlertTriangle, EyeOff, MapPin } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -172,6 +172,31 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-green-400 transition-colors">Essay Integrity</h3>
                   <p className="text-sm text-gray-400">Did your student actually write this? Stylometric analysis doesn't lie. (Unlike your students.)</p>
+               </Link>
+
+               {/* Anti AI Spy - Photo Security */}
+               <Link href="/services/photo" className="md:col-span-3 group relative overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-r from-zinc-900/50 to-red-950/20 p-8 hover:border-red-500/50 transition-all duration-300">
+                  <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                     <MapPin className="w-48 h-48" />
+                  </div>
+                  <div className="absolute top-4 right-4 px-2 py-1 bg-red-500/20 border border-red-500/30 rounded text-red-400 text-xs font-mono animate-pulse">
+                    NEW SERVICE
+                  </div>
+                  <div className="relative z-10 flex items-start gap-6">
+                     <div className="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform flex-shrink-0">
+                        <EyeOff className="w-7 h-7" />
+                     </div>
+                     <div className="flex-1">
+                        <h3 className="text-2xl font-bold mb-2 group-hover:text-red-400 transition-colors">Anti AI Spy — Photo Security</h3>
+                        <p className="text-gray-400 max-w-2xl mb-3">AI can now geo-locate you from tiny background clues in your photos. Street signs, power lines, vegetation patterns, architectural styles — all traceable. We neutralize these threats before you post.</p>
+                        <div className="flex items-center gap-4 text-sm">
+                           <span className="text-gray-500 font-mono">$3.99/photo or included with Pro</span>
+                           <span className="text-red-400 font-mono group-hover:gap-4 transition-all flex items-center gap-2">
+                              SECURE NOW <ArrowRight className="w-4 h-4" />
+                           </span>
+                        </div>
+                     </div>
+                  </div>
                </Link>
             </div>
          </div>

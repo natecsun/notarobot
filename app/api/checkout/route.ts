@@ -94,6 +94,41 @@ export async function POST(req: Request) {
       });
 
       return NextResponse.json({ url: session.url });
+    } else if (type === 'photo_security') {
+      // Handle one-time photo security purchase ($3.99)
+      const { returnUrl } = await req.json().catch(() => ({}));
+      
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "Anti AI Spy - Photo Security",
+                description: "One-time photo security service: Remove location-identifiable elements from your photo to prevent AI geo-location tracking.",
+              },
+              unit_amount: 399, // $3.99
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: returnUrl 
+          ? `${returnUrl}?photo_success=true&session_id={CHECKOUT_SESSION_ID}`
+          : `${process.env.NEXT_PUBLIC_BASE_URL}/services/photo?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: returnUrl 
+          ? `${returnUrl}?canceled=true`
+          : `${process.env.NEXT_PUBLIC_BASE_URL}/services/photo?canceled=true`,
+        customer_email: user.email,
+        metadata: {
+          userId: user.id,
+          type: 'photo_security',
+          service: 'anti_ai_spy',
+        },
+      });
+
+      return NextResponse.json({ url: session.url });
     } else {
       return NextResponse.json({ error: "Invalid checkout type" }, { status: 400 });
     }
